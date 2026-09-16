@@ -56,7 +56,7 @@ banned words list, no invented statistics or client names).
 
 ### brand
 - name: `Billion`
-- title (document title): `Billion — Software house. Think bigger.`
+- title (document title): `Billion — Software house. Think Bigger.` (uppercase Bigger everywhere; it is the motto)
 
 ### hero
 - eyebrow: `Software house · Cairo, Egypt`
