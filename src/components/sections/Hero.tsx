@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
+import { Orb } from "@/components/brand/Orb";
 import { SystemSchematic } from "@/components/drawings/Schematics";
+import { HeroWatermark } from "@/components/motion/HeroWatermark";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ArrowRight } from "@/components/ui/Icons";
@@ -16,16 +18,29 @@ function stagger(index: number): CSSProperties {
   return { "--reveal-index": index } as CSSProperties;
 }
 
-/** Two-line motto painted immediately, with a static Kiln full stop reserved for the later orb. */
+/** Two-line motto paints at full opacity; only the individual words translate. */
 function HeroTitle() {
-  const emphasisStart = hero.title.line2.lastIndexOf(" ") + 1;
+  const firstLine = hero.title.line1.split(" ");
+  const secondLine = hero.title.line2.split(" ");
   return (
     <h1 id="hero-title" className="mt-5 text-[clamp(3.25rem,10vw,8.5rem)] leading-[0.95] tracking-[-0.03em]">
-      <span className="block">{hero.title.line1}</span>{" "}
       <span className="block">
-        {hero.title.line2.slice(0, emphasisStart)}
-        <span className="text-kiln">{hero.title.line2.slice(emphasisStart)}</span>
-        <span aria-hidden="true" data-orb-slot className="inline-block size-[0.42em] rounded-full bg-kiln align-baseline" />
+        {firstLine.map((word, index) => (
+          <span key={`${word}-${index}`}>
+            {index > 0 ? " " : null}
+            <span className="hero-word inline-block" style={{ "--i": index } as CSSProperties}>{word}</span>
+          </span>
+        ))}
+      </span>{" "}
+      <span className="block">
+        {secondLine.map((word, index) => (
+          <span key={`${word}-${index}`}>
+            {index > 0 ? " " : null}
+            <span className="hero-word inline-block" style={{ "--i": firstLine.length + index } as CSSProperties}>
+              {index === secondLine.length - 1 ? <span className="text-kiln">{word}</span> : word}
+            </span>{index === secondLine.length - 1 ? <Orb /> : null}
+          </span>
+        ))}
       </span>
     </h1>
   );
@@ -38,7 +53,8 @@ export function Hero() {
       aria-labelledby="hero-title"
       className="pt-[calc(var(--nav-height)+3.5rem+env(safe-area-inset-top,0px))] pb-24 md:pt-[calc(var(--nav-height)+5.5rem)] lg:pb-32"
     >
-      <Container>
+      <Container className="relative isolate">
+        <HeroWatermark />
         <p className="hero-in font-mono text-meta uppercase text-ink-2" style={stagger(0)}>
           {hero.eyebrow}
         </p>
@@ -61,7 +77,10 @@ export function Hero() {
           {hero.trustLine}
         </p>
 
-        <div className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12" style={stagger(1)}>
+        <div
+          className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12"
+          style={stagger(1)}
+        >
           <SystemSchematic className="self-end text-ink-2 lg:col-span-8" />
 
           <aside
