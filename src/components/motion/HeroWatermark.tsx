@@ -3,7 +3,7 @@
 import { useReducedMotion, useScroll, useTransform } from "motion/react";
 import * as m from "motion/react-m";
 import { useRef } from "react";
-import { useMotionPreference } from "@/components/motion/MotionProvider";
+import { useMotionPreference } from "@/components/motion/useMotionPreference";
 
 export function HeroWatermark() {
   const ref = useRef<HTMLDivElement>(null);

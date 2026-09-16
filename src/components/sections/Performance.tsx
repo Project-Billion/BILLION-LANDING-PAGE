@@ -1,10 +1,15 @@
 import { Container } from "@/components/ui/Container";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { performance } from "@/content/site";
+import { Counter } from "@/components/motion/Counter";
+import { VitalValue } from "@/components/perf/VitalValue";
+import { performance as performanceContent } from "@/content/site";
+
+/** Matches a value that is purely numeric (integer or decimal), e.g. "96" or "38.2". */
+const NUMERIC_VALUE = /^\d+(\.\d+)?$/;
 
 /** 03 Performance: an inverted ledger with targets, audit results and engineering principles. */
 export function Performance() {
-  const { section, vitals, audits, principles } = performance;
+  const { section, vitals, audits, principles } = performanceContent;
 
   return (
     <section id={section.id} aria-labelledby={`${section.id}-title`} className="bg-ink py-24 text-paper lg:py-40">
@@ -14,9 +19,9 @@ export function Performance() {
         <div className="mt-12 grid gap-12 lg:mt-16 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <h2 id={`${section.id}-title`} className="max-w-[20ch] text-h2 text-paper">
-              {performance.title}
+              {performanceContent.title}
             </h2>
-            <p className="mt-8 max-w-[48ch] text-body text-paper/70">{performance.body}</p>
+            <p className="mt-8 max-w-[48ch] text-body text-paper/70">{performanceContent.body}</p>
           </div>
 
           <div className="min-w-0 lg:col-span-7">
@@ -32,7 +37,7 @@ export function Performance() {
                   </dt>
                   <dd className="col-start-2 whitespace-nowrap text-paper sm:col-start-3">{vital.target}</dd>
                   <dd className="col-start-2 text-paper/70 sm:col-span-2">
-                    <span data-vital={vital.key}>{performance.vitalStates.measuring}</span>
+                    <VitalValue metric={vital.key} />
                   </dd>
                 </div>
               ))}
@@ -44,12 +49,18 @@ export function Performance() {
               ) : (
                 <>
                   <dl className="border-t border-rule-dark">
-                    {audits.rows.map((row) => (
-                      <div key={row.label} className="flex justify-between gap-6 border-b border-rule-dark py-4">
-                        <dt>{row.label}</dt>
-                        <dd className="text-right text-paper">{row.value}</dd>
-                      </div>
-                    ))}
+                    {audits.rows.map((row) => {
+                      const match = NUMERIC_VALUE.exec(row.value);
+                      const decimals = match?.[1] ? match[1].length - 1 : 0;
+                      return (
+                        <div key={row.label} className="flex justify-between gap-6 border-b border-rule-dark py-4">
+                          <dt>{row.label}</dt>
+                          <dd className="text-right text-paper">
+                            {match ? <Counter to={Number(row.value)} decimals={decimals} /> : row.value}
+                          </dd>
+                        </div>
+                      );
+                    })}
                   </dl>
                   {audits.browser || audits.date ? (
                     <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2">

@@ -179,7 +179,9 @@ export const performance = {
     good: "good",
     needsWork: "needs work",
     poor: "poor",
-    awaitingInput: "tap or scroll to measure",
+    awaitingInput: "tap or press a key to measure",
+    unsupported: "not measured by this browser",
+    notMeasured: "not measured on this visit",
   },
   /** Filled only from an audit of this build; never seed these fields with estimates. */
   audits: {

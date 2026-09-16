@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ThinkingOrb as OrbComponent } from "thinking-orbs";
-import { useMotionPreference } from "@/components/motion/MotionProvider";
+import { useMotionPreference } from "@/components/motion/useMotionPreference";
 
 const ThinkingOrb = dynamic(
   () => import("thinking-orbs").then(
