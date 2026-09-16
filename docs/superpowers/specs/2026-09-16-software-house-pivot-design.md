@@ -83,7 +83,7 @@ banned words list, no invented statistics or client names).
 ### performance (section 03, label `Performance`, dark band)
 - title: `Optimized to the max. Starting with this page.`
 - body: `We hold ourselves to the numbers you are looking at. These are this page's Core Web Vitals, measured in your browser right now, next to the targets we build every project against.`
-- live metrics (measured client-side with `web-vitals`): LCP (target ≤ 2.5 s), CLS (≤ 0.1), INP (≤ 200 ms). States: `measuring…`, value + `good` / `needs work` / `poor` per Google thresholds, and for INP before any interaction: `tap or scroll to measure`.
+- live metrics (measured client-side with `web-vitals`): LCP (target ≤ 2.5 s), CLS (≤ 0.1), INP (≤ 200 ms). States: `measuring…`, value + `good` / `needs work` / `poor` per Google thresholds, for INP before any interaction: `tap or press a key to measure`, and if LCP or CLS still hasn't reported after 10 s (e.g. the page loaded in a background tab): `not measured on this visit`.
 - audits (static, from our own Lighthouse run of THIS build, filled in by the QA task; never invented): Lighthouse mobile Accessibility, Best practices, SEO, Performance; median LCP; total JavaScript shipped (kB gzip). Rendered as a mono ledger with the browser and date.
 - principles ledger:
   1. `Profile first` — `No guessing. We find the real bottleneck before we touch code.`
