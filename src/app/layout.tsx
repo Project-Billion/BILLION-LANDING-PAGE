@@ -9,7 +9,8 @@ const newsreader = Newsreader({
   variable: "--font-newsreader",
   subsets: ["latin"],
   axes: ["opsz"],
-  style: ["normal", "italic"],
+  /* Normal only: no italic display text exists, and a preloaded italic face delayed the hero LCP. */
+  style: ["normal"],
 });
 
 const geistSans = Geist({

@@ -7,10 +7,10 @@ interface IconProps {
   className?: string;
 }
 
-/** Long horizontal arrow used on primary actions. */
-export function ArrowRight({ className = "" }: IconProps) {
+/** Long horizontal arrow used on primary actions. Width defaults to 28px; pass a w-* class to override. */
+export function ArrowRight({ className = "w-7" }: IconProps) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 28 12" fill="none" stroke="currentColor" strokeWidth="1.25" className={`h-3 w-7 ${className}`}>
+    <svg aria-hidden="true" viewBox="0 0 28 12" fill="none" stroke="currentColor" strokeWidth="1.25" className={`h-3 ${className}`}>
       <path d="M0 6h27M22 1l5 5-5 5" />
     </svg>
   );

@@ -5,7 +5,11 @@ import { Container } from "@/components/ui/Container";
 import { ArrowRight } from "@/components/ui/Icons";
 import { hero, newTabHint, whatsappUrl } from "@/content/site";
 
-/** Stagger position for the one on-load reveal (.hero-in in globals.css). */
+/**
+ * Stagger position for the one on-load reveal (.hero-in in globals.css). Only the eyebrow, H1 and
+ * lower panel animate; the lead paragraph and CTAs paint immediately because the paragraph is the
+ * mobile LCP element and hiding it behind opacity delayed LCP (QA03).
+ */
 function stagger(index: number): CSSProperties {
   return { "--reveal-index": index } as CSSProperties;
 }
@@ -36,11 +40,11 @@ export function Hero() {
           {hero.eyebrow}
         </p>
         <HeroTitle />
-        <p className="hero-in mt-8 max-w-[53rem] text-body text-ink-2 md:text-[1.1875rem]" style={stagger(2)}>
+        <p className="mt-8 max-w-[53rem] text-body text-ink-2 md:text-[1.1875rem]">
           {hero.sub}
         </p>
 
-        <div className="hero-in mt-10 flex flex-col gap-4 sm:flex-row" style={stagger(3)}>
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
             {hero.primaryCta}
             <ArrowRight />
@@ -50,11 +54,11 @@ export function Hero() {
             {hero.secondaryCta.label}
           </Button>
         </div>
-        <p className="hero-in mt-5 max-w-[60rem] text-ui text-graphite" style={stagger(4)}>
+        <p className="mt-5 max-w-[60rem] text-ui text-graphite">
           {hero.trustLine}
         </p>
 
-        <div className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12" style={stagger(5)}>
+        <div className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12" style={stagger(2)}>
           <ProductionLine className="self-end text-ink-2 lg:col-span-8" />
 
           <aside

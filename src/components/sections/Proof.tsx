@@ -12,7 +12,7 @@ function ChatStill() {
       <figcaption id="proof-chat-caption" className="sr-only">
         {chat.caption}
       </figcaption>
-      <div lang="ar" dir="rtl" className="font-arabic">
+      <div lang="ar" dir="rtl" className="font-arabic pb-5">
         <div className="flex items-center justify-between border-b border-rule px-5 py-4">
           <p className="text-[1.0625rem] font-medium">{chat.header}</p>
           <span lang="en" dir="ltr" className="font-display text-xl leading-none tracking-[-0.02em]">
@@ -33,7 +33,7 @@ function ChatStill() {
           ))}
         </ul>
 
-        <div aria-hidden="true" className="mx-5 mb-5 flex min-h-12 items-center rounded-sm border border-rule bg-white">
+        <div aria-hidden="true" className="mx-5 flex min-h-12 items-center rounded-sm border border-rule bg-white">
           <span className="flex-1 px-4 text-ui text-graphite">{chat.inputPlaceholder}</span>
           <span className="flex h-12 w-12 items-center justify-center border-s border-rule">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.25" className="size-5 -scale-x-100">

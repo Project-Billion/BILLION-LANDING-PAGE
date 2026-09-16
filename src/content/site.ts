@@ -97,6 +97,11 @@ export const nav = {
   whatsappLabel: "WhatsApp",
   menuOpenLabel: "Open menu",
   menuCloseLabel: "Close menu",
+  /** Visible toggle text; the accessible names above stay the source for screen readers. */
+  menuOpenText: "Menu",
+  menuCloseText: "Close",
+  /** Accessible name of the open sheet dialog. */
+  menuDialogLabel: "Site menu",
 } as const;
 
 export const hero = {
@@ -226,7 +231,11 @@ export const footer = {
   links: {
     valor: { label: "Valor Labs", href: valorUrl },
     linkedin: { label: "LinkedIn" },
-    privacy: { label: "Privacy", href: "#privacy" },
+    /*
+     * Privacy link removed until a real policy exists (QA07). To restore it, add
+     * `privacy: { label: "Privacy", href: "/privacy" }` here and render it as the last
+     * item of the links list in src/components/site/Footer.tsx.
+     */
   },
   copyright: "© 2026 Billion.",
 } as const;

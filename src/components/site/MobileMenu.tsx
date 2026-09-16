@@ -8,9 +8,28 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
 const DESKTOP_QUERY = "(min-width: 768px)";
 
 /**
+ * Marks every sibling of `dialog` and of each of its ancestors up to <body> as inert, so only
+ * the dialog stays reachable. Returns the elements it changed (already-inert ones are skipped)
+ * so the caller can restore exactly those.
+ */
+function inertOutside(dialog: HTMLElement): HTMLElement[] {
+  const changed: HTMLElement[] = [];
+  for (let node: HTMLElement | null = dialog; node && node !== document.body; node = node.parentElement) {
+    for (const sibling of Array.from(node.parentElement?.children ?? [])) {
+      if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue;
+      sibling.inert = true;
+      changed.push(sibling);
+    }
+  }
+  return changed;
+}
+
+/**
  * Full-height sheet menu for viewports under 768px.
- * Traps focus between the toggle and the sheet, closes on Escape, link click,
- * or when the viewport grows to desktop, and locks body scroll while open.
+ * While open, the toggle and sheet form a labelled modal dialog: everything outside it is
+ * made inert (hidden from assistive tech and unfocusable), focus is trapped inside, and body
+ * scroll is locked. Closes on Escape, the toggle, any sheet link, or when the viewport grows
+ * to desktop; every user-initiated close returns focus to the toggle.
  */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -28,6 +47,7 @@ export function MobileMenu() {
 
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
+    const outside = trapRef.current ? inertOutside(trapRef.current) : [];
     trapRef.current?.querySelector<HTMLElement>(`#${CSS.escape(sheetId)} a[href]`)?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -61,13 +81,22 @@ export function MobileMenu() {
     desktop.addEventListener("change", onViewportChange);
     return () => {
       document.body.style.overflow = overflow;
+      outside.forEach((element) => {
+        element.inert = false;
+      });
       document.removeEventListener("keydown", onKeyDown);
       desktop.removeEventListener("change", onViewportChange);
     };
   }, [open, close, sheetId]);
 
   return (
-    <div ref={trapRef} className="md:hidden">
+    <div
+      ref={trapRef}
+      role={open ? "dialog" : undefined}
+      aria-modal={open ? true : undefined}
+      aria-label={open ? nav.menuDialogLabel : undefined}
+      className="md:hidden"
+    >
       <button
         ref={toggleRef}
         type="button"
@@ -77,7 +106,7 @@ export function MobileMenu() {
         onClick={() => setOpen((value) => !value)}
         className="btn relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm px-3 font-mono text-meta uppercase text-ink"
       >
-        <span aria-hidden="true">{open ? "Close" : "Menu"}</span>
+        <span aria-hidden="true">{open ? nav.menuCloseText : nav.menuOpenText}</span>
       </button>
 
       <div
@@ -91,7 +120,7 @@ export function MobileMenu() {
             <li key={link.href} className="border-b border-rule">
               <a
                 href={link.href}
-                onClick={() => setOpen(false)}
+                onClick={close}
                 className="flex min-h-16 items-center font-display text-[2rem] leading-none tracking-[-0.02em] text-ink"
               >
                 {link.label}
@@ -105,7 +134,7 @@ export function MobileMenu() {
           target="_blank"
           rel="noopener noreferrer"
           className="mt-auto w-full"
-          onClick={() => setOpen(false)}
+          onClick={close}
         >
           {nav.whatsappLabel}
           <span className="sr-only">{newTabHint}</span>

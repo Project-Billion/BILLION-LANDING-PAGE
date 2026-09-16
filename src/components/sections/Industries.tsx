@@ -18,7 +18,7 @@ export function Industries() {
         />
 
         <div className="md:col-span-10">
-          <ul className="border-t border-rule">
+          <ul role="list" className="border-t border-rule">
             {items.map((item, i) => (
               <li key={item.name} className="border-b border-rule">
                 <Reveal
