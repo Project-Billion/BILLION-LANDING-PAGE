@@ -13,7 +13,7 @@ interface CellLayout {
 }
 
 const cellLayouts: readonly CellLayout[] = [
-  { span: "md:col-span-8", surface: "bg-paper", drawing: <DataFlow className="mt-8 max-w-[30rem] text-ink-2 md:ml-[12%]" /> },
+  { span: "md:col-span-8", surface: "bg-paper", drawing: <DataFlow className="mt-8 max-w-[30rem] text-ink-2 md:mx-auto" /> },
   { span: "md:col-span-4", surface: "bg-paper-2" },
   { span: "md:col-span-5", surface: "bg-paper-2" },
   { span: "md:col-span-7", surface: "bg-paper", drawing: <CircuitPath className="mt-8 ml-auto max-w-[10rem] text-ink-2" /> },
@@ -27,7 +27,7 @@ export function ValueProps() {
       <Container>
         <SectionLabel as="h2" id={`${section.id}-title`} index={section.index} label={section.label} />
 
-        <ul className="mt-12 grid gap-px border border-rule bg-rule md:grid-cols-12">
+        <ul role="list" className="mt-12 grid gap-px border border-rule bg-rule md:grid-cols-12">
           {items.map((item, i) => {
             const layout = cellLayouts[i];
             return (
