@@ -1,6 +1,7 @@
 /**
  * All page copy and owner-replaceable placeholders live in this file.
- * Copy is taken from docs/BRIEF.md section 5; placeholders from section 6.
+ * Copy comes from docs/superpowers/specs/2026-09-16-software-house-pivot-design.md.
+ * Owner-replaceable placeholders remain from docs/BRIEF.md section 6.
  */
 
 export interface NavLink {
@@ -13,9 +14,17 @@ export interface TitledItem {
   readonly body: string;
 }
 
-export interface Industry {
-  readonly name: string;
-  readonly leaks: string;
+/** Core Web Vital and the target every project is measured against. */
+export interface Vital {
+  readonly key: "LCP" | "CLS" | "INP";
+  readonly label: string;
+  readonly target: string;
+}
+
+/** A measured result from an audit of this build; populated by the QA task. */
+export interface AuditRow {
+  readonly label: string;
+  readonly value: string;
 }
 
 export interface Step extends TitledItem {
@@ -84,13 +93,13 @@ export const valorUrl = "https://valor-labs.com";
 
 export const brand = {
   name: "Billion",
-  title: "Billion — Industrial software, made in Egypt",
+  title: "Billion — Software house. Think Bigger.",
 } as const;
 
 export const nav = {
   links: [
-    { label: "What we do", href: "#what-we-do" },
-    { label: "Industries", href: "#industries" },
+    { label: "What we build", href: "#what-we-build" },
+    { label: "Performance", href: "#performance" },
     { label: "How we work", href: "#how-we-work" },
     { label: "Proof", href: "#proof" },
   ] satisfies readonly NavLink[],
@@ -105,65 +114,94 @@ export const nav = {
 } as const;
 
 export const hero = {
-  eyebrow: "Industrial software, made in Egypt",
-  title: "Run the plant on facts, not phone calls.",
-  /** Word in the title that gets the single Kiln underline. */
-  titleEmphasis: "facts",
-  sub: "Billion builds AI and operations software for Egyptian manufacturers: production tracking, predictive maintenance, quality control and planning that work on the floor from day one, with a payback you can measure.",
-  primaryCta: "Book a plant walkthrough",
-  secondaryCta: { label: "See how we work", href: "#how-we-work" },
+  eyebrow: "Software house · Cairo, Egypt",
+  title: { line1: "Think Bigger", line2: "Think Billion" },
+  sub: "Billion is a software house with one obsession: performance, pushed to the maximum. AI products, platforms, data systems, operations software. Bring us any problem; we build the solution and we make it fast.",
+  primaryCta: "Talk to an engineer",
+  secondaryCta: { label: "See what we build", href: "#what-we-build" },
   trustLine:
-    "Egyptian team. On site across the industrial zones: 10th of Ramadan, 6th of October, Borg El Arab, Sadat City.",
+    "Engineers in Cairo. Arabic-first when it matters, English everywhere else. Sister company: Valor Labs.",
   panel: {
     index: "01",
-    title: "What we look at first",
+    title: "What we optimize first",
     items: [
-      "stoppages",
-      "scrap rate",
-      "energy per unit",
-      "changeover time",
-      "delivery slips",
+      "load time",
+      "response latency",
+      "cost per request",
+      "failure rate",
+      "time to ship",
     ],
   },
 } as const;
 
-export const valueProps = {
-  section: { id: "what-we-do", index: "02", label: "What you get" } satisfies SectionMeta,
+export const whatWeBuild = {
+  section: { id: "what-we-build", index: "02", label: "What we build" } satisfies SectionMeta,
   items: [
     {
-      title: "Decisions from your own data",
-      body: "We connect what you already run, ERP, PLCs, Excel, paper logs, and turn it into answers: which line loses the most, why, and what to do this shift.",
+      title: "AI products and agents",
+      body: "Assistants, agents and retrieval systems that non-technical people actually use, in Arabic or English, on the phones they already own.",
     },
     {
-      title: "Measured payback",
-      body: "Every project starts with a baseline and a target: scrap rate, downtime hours, energy per unit. If the number does not move, we are not finished.",
+      title: "Platforms and products",
+      body: "Web and mobile products, APIs and back offices, built to ship in weeks and to run for years.",
     },
     {
-      title: "Built to survive the floor",
-      body: "Works through power cuts and bad connectivity, runs on the hardware you have, and hands over with operator training in Arabic.",
+      title: "Performance engineering",
+      body: "Bring us something slow. We profile it, find the real bottleneck, and make it fast: pages, APIs, databases, pipelines, models.",
     },
     {
-      title: "Weeks, not quarters",
-      body: "A pilot on one line first. We scale only after it proves itself, with the same people and the same numbers.",
+      title: "Data and automation",
+      body: "Pipelines, integrations and reporting that connect what you already run, from ERPs to spreadsheets, and remove the manual work in between.",
+    },
+    {
+      title: "Industrial and operations software",
+      body: "Production tracking, maintenance and quality systems that survive the factory floor. Where Billion started, and still a specialty.",
+    },
+    {
+      title: "The problem nobody else wants",
+      body: "If it is hard, unusual, or half-finished by someone else, that is the work we like. Bring it.",
     },
   ] satisfies readonly TitledItem[],
+  closing: "Different problems, same discipline: measure first, build small, make it fast, then scale.",
 } as const;
 
-export const industries = {
-  section: { id: "industries", index: "03", label: "Industries" } satisfies SectionMeta,
-  items: [
-    { name: "Food and beverage", leaks: "changeovers, shelf-life traceability, line stoppages" },
-    { name: "Textiles and garments", leaks: "fabric defects, order tracking, delivery slips" },
-    { name: "Plastics and packaging", leaks: "scrap and regrind, mold changeover, energy per kg" },
+export const performance = {
+  section: { id: "performance", index: "03", label: "Performance" } satisfies SectionMeta,
+  title: "Optimized to the max. Starting with this page.",
+  body: "We hold ourselves to the numbers you are looking at. These are this page's Core Web Vitals, measured in your browser right now, next to the targets we build every project against.",
+  vitals: [
+    { key: "LCP", label: "Largest Contentful Paint", target: "≤ 2.5 s" },
+    { key: "CLS", label: "Cumulative Layout Shift", target: "≤ 0.1" },
+    { key: "INP", label: "Interaction to Next Paint", target: "≤ 200 ms" },
+  ] satisfies readonly Vital[],
+  vitalStates: {
+    measuring: "measuring…",
+    good: "good",
+    needsWork: "needs work",
+    poor: "poor",
+    awaitingInput: "tap or scroll to measure",
+  },
+  /** Filled only from an audit of this build; never seed these fields with estimates. */
+  audits: {
+    note: "Measured on this build. Numbers are filled in from our own audit, never invented.",
+    browser: null as string | null,
+    date: null as string | null,
+    rows: [] as readonly AuditRow[],
+  },
+  principles: [
     {
-      name: "Building materials (cement, ceramics, steel)",
-      leaks: "kiln and furnace energy, predictive maintenance",
+      title: "Profile first",
+      body: "No guessing. We find the real bottleneck before we touch code.",
     },
-    { name: "Pharmaceuticals", leaks: "batch records, deviations, compliance paperwork" },
-    { name: "Chemicals and fertilizers", leaks: "yield, dosing accuracy, safety logs" },
-    { name: "Automotive and metal components", leaks: "rework, tool wear, takt time" },
-  ] satisfies readonly Industry[],
-  closing: "Different products, same leaks. We start where yours is biggest.",
+    {
+      title: "Budgets, not hopes",
+      body: "Every project gets performance budgets: load time, latency, cost. The build fails when they are missed.",
+    },
+    {
+      title: "Fast on real devices",
+      body: "We test on ordinary phones and slow networks, not on our own laptops.",
+    },
+  ] satisfies readonly TitledItem[],
 } as const;
 
 export const howItWorks = {
@@ -171,23 +209,23 @@ export const howItWorks = {
   steps: [
     {
       index: "01",
-      title: "Walk the floor",
-      body: "Half a day on site. We watch the lines, talk to the shift leads, and map where money leaks: stoppages, rework, waiting.",
+      title: "Understand the problem",
+      body: "Half a day with the people who live with it. We map where time, money or trust leaks before we propose anything.",
     },
     {
       index: "02",
       title: "Pick one number",
-      body: "One line, one metric, one baseline. A pilot scoped to prove value, not to impress.",
+      body: "One outcome, one metric, one baseline. A first release scoped to prove value, not to impress.",
     },
     {
       index: "03",
-      title: "Build and run it with your team",
-      body: "We deploy on your network, train operators in Arabic, and stay through the first production weeks.",
+      title: "Build it with your team",
+      body: "We ship in weeks, deploy where you run, and stay through the first real usage. Arabic or English, your choice.",
     },
     {
       index: "04",
       title: "Scale what worked",
-      body: "Roll out to the next lines with the same people and the same numbers. You own the system and the data.",
+      body: "Grow it with the same people and the same numbers. You own the code, the system and the data.",
     },
   ] satisfies readonly Step[],
 } as const;
@@ -198,7 +236,7 @@ export const proof = {
   title: "Valor Labs: an AI engineer in every farmer's pocket",
   body: "Valor, Billion's sister company, sells soil and crop products to farmers and distributors across Egypt. Billion built its 'Ask Our Engineer' assistant: agronomy answers in Egyptian Arabic, weather for the farmer's own location, and market prices, on the phone the farmer already owns.",
   pullLine:
-    "What it proves for a factory: Arabic-language AI that non-technical people actually use, in the field, on ordinary phones. The same discipline goes on the shop floor.",
+    "What it proves: AI that non-technical people actually use, in their own language, on ordinary phones, in the field. The same discipline goes into everything we build.",
   link: { label: "Visit valor-labs.com", href: valorUrl },
   /** Illustrative schematic dialogue about a crop question, not a real transcript. */
   chat: {
@@ -216,8 +254,8 @@ export const proof = {
 
 export const cta = {
   section: { id: "contact", index: "06" } satisfies SectionMeta,
-  title: "Start with one line.",
-  body: "Tell us which line hurts most. We will come to the plant, look at it with you, and say honestly whether software will pay off and what it would cost.",
+  title: "Bring us the hardest thing on your plate.",
+  body: "Tell us what is slow, stuck or not built yet. We will look at it with you and say honestly whether it is worth building, how fast it can be, and what it would cost.",
   whatsappLabel: "WhatsApp us",
   emailLabel: "Email us",
   responseNote: "Replies within one working day. Cairo time.",
@@ -225,7 +263,7 @@ export const cta = {
 
 export const footer = {
   index: "07",
-  tagline: "Software for Egyptian industry.",
+  tagline: "Think Bigger. Think Billion.",
   whatsappLabel: "WhatsApp",
   location: "Cairo, Egypt",
   links: {
