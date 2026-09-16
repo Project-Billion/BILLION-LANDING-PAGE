@@ -60,7 +60,11 @@ banned words list, no invented statistics or client names).
 
 ### hero
 - eyebrow: `Software house · Cairo, Egypt`
-- title: `Think bigger. Think Billion.` — emphasis word (drawn underline): `bigger`
+- title: the motto, first thing on the page, two stacked lines, no punctuation:
+  line 1 `Think Bigger`, line 2 `Think Billion`. Modelled as `title: { line1, line2 }`.
+  The word `Billion` is set in Kiln. The thinking orb is the full stop after it
+  (see section 6). Owner instruction 2026-09-16: "write Think Bigger Think Billion
+  in the first of the page with cool style".
 - sub: `Billion is a software house with one obsession: performance, pushed to the maximum. AI products, platforms, data systems, operations software. Bring us any problem; we build the solution and we make it fast.`
 - primaryCta: `Talk to an engineer` (WhatsApp)
 - secondaryCta: `See what we build` → `#what-we-build`
@@ -111,9 +115,9 @@ animations, no gesture handlers beyond hover.
 
 | Where | What | How | Fallback |
 |---|---|---|---|
-| Hero | Thinking orb (brand mark that breathes) | `thinking-orbs` npm (MIT, canvas), `next/dynamic` with `ssr:false`, 112 px desktop / 80 px mobile, ink + kiln colours, paused when off-screen | Static inline SVG disc (ink with kiln ring) server-rendered; kept for reduced motion and no-JS |
-| Hero | Drawn underline under `bigger` | Inline SVG path, CSS `stroke-dashoffset` keyframe after the existing `.hero-in` sequence | Underline shown static |
-| Hero | H1 | **Renders static, full opacity, no animation** (LCP element; QA03 lesson) | — |
+| Hero | H1 "Think Bigger / Think Billion" | Newsreader 400, `clamp(3.25rem, 10vw, 8.5rem)`, tracking -0.03em, leading 0.95, two `block` spans. **Painted at full opacity on first paint, never an opacity animation** (LCP element; QA03 lesson). Entrance is transform-only: each word rises from `translateY(0.25em)` to 0 over 700 ms with `--ease-out`, 70 ms stagger, so LCP is unaffected | Words shown in place |
+| Hero | Living full stop | The thinking orb (`thinking-orbs` npm, MIT, canvas) is rendered inline as the period after `Billion`, a 0.42em box on the baseline, ink + kiln colours, `next/dynamic` with `ssr:false`, paused when off-screen | A static Kiln disc of the same size is server-rendered and stays for reduced motion and no-JS |
+| Hero | Depth layer | Hairline outlined `BILLION` watermark (SVG text, stroke = rule colour, no fill) spanning the hero behind the H1, drifting about 6% upward with scroll via `useScroll` (transform-only) | Static; hidden under reduced motion |
 | 02 cards | Rise-in stagger on first view; hover lift + border beam | `m.div` `whileInView` once, spring; `border-beam` npm (MIT) rendered only while hovered | Static cards |
 | 03 band | Number counters | `motion` `animate()` on a motion value, once when in view | Final value rendered |
 | 03 band | Live vitals | `web-vitals` v6 `onLCP/onCLS/onINP` in a client component | Server renders the targets only; `measuring…` is the no-JS text |
