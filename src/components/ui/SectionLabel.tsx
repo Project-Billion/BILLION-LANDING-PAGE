@@ -1,33 +1,42 @@
-export type SectionTone = "paper" | "paper-2" | "ink";
+export type SectionTone = "light" | "ink";
 
 interface SectionLabelProps {
   /** Two-digit section index, e.g. "02". */
   index: string;
   /** Plain-language label, e.g. "What you get". Omit to show the index alone. */
   label?: string;
+  /** Render as the section heading (h2) when the section has no other title. */
+  as?: "p" | "h2";
+  id?: string;
   /**
-   * Background the label sits on. Kiln index text passes AA only on Paper (4.5:1),
-   * so on Paper-2 the index falls back to Ink, and on Ink everything is Paper.
+   * Background the label sits on. Small text is never Kiln (fails AA on Paper-2 and is
+   * marginal on Paper), so the index is Ink on light surfaces and Paper on Ink.
    */
   tone?: SectionTone;
   className?: string;
 }
 
 const toneClasses: Record<SectionTone, { text: string; index: string }> = {
-  paper: { text: "text-graphite", index: "text-kiln" },
-  "paper-2": { text: "text-graphite", index: "text-ink" },
+  light: { text: "text-graphite", index: "text-ink" },
   ink: { text: "text-paper/70", index: "text-paper" },
 };
 
 /**
  * Mono metadata label for a numbered section, e.g. "02 — What you get".
  */
-export function SectionLabel({ index, label, tone = "paper", className = "" }: SectionLabelProps) {
+export function SectionLabel({
+  index,
+  label,
+  as: Tag = "p",
+  id,
+  tone = "light",
+  className = "",
+}: SectionLabelProps) {
   const colors = toneClasses[tone];
   return (
-    <p className={`font-mono text-meta uppercase ${colors.text} ${className}`}>
+    <Tag id={id} className={`font-mono text-meta uppercase ${colors.text} ${className}`}>
       <span className={colors.index}>{index}</span>
       {label ? ` — ${label}` : null}
-    </p>
+    </Tag>
   );
 }

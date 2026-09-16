@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { nav, whatsappUrl } from "@/content/site";
+import { nav, newTabHint, whatsappUrl } from "@/content/site";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -108,6 +108,7 @@ export function MobileMenu() {
           onClick={() => setOpen(false)}
         >
           {nav.whatsappLabel}
+          <span className="sr-only">{newTabHint}</span>
         </Button>
       </div>
     </div>

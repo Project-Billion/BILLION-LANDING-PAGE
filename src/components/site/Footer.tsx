@@ -1,17 +1,9 @@
 import { Container } from "@/components/ui/Container";
-import { brand, footer, mailtoUrl, siteConfig, whatsappUrl } from "@/content/site";
+import { ArrowUpRight } from "@/components/ui/Icons";
+import { brand, footer, mailtoUrl, newTabHint, siteConfig, whatsappUrl } from "@/content/site";
 
 const linkClass =
   "inline-flex min-h-11 items-center text-ui text-ink underline decoration-rule decoration-1 underline-offset-4 transition-colors duration-(--duration-hover) hover:decoration-ink";
-
-/** Hairline arrow for external links, drawn from line primitives. */
-function ExternalArrow() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 12 12" className="ml-2 size-3" fill="none" stroke="currentColor" strokeWidth="1.25">
-      <path d="M3 9 9 3M4 3h5v5" />
-    </svg>
-  );
-}
 
 /** Minimal colophon footer (BRIEF section 07). */
 export function Footer() {
@@ -32,7 +24,8 @@ export function Footer() {
             </a>
             <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className={linkClass}>
               {footer.whatsappLabel}
-              <ExternalArrow />
+              <ArrowUpRight className="ml-2" />
+              <span className="sr-only">{newTabHint}</span>
             </a>
             <p className="mt-2 font-mono text-meta text-graphite">{footer.location}</p>
           </address>
@@ -41,12 +34,14 @@ export function Footer() {
             <li>
               <a href={footer.links.valor.href} target="_blank" rel="noopener noreferrer" className={linkClass}>
                 {footer.links.valor.label}
-                <ExternalArrow />
+                <ArrowUpRight className="ml-2" />
+                <span className="sr-only">{newTabHint}</span>
               </a>
             </li>
             <li>
               <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className={linkClass}>
                 {footer.links.linkedin.label}
+                <span className="sr-only">{newTabHint}</span>
               </a>
             </li>
             <li>

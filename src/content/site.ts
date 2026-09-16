@@ -29,6 +29,11 @@ export interface SectionMeta {
   readonly label?: string;
 }
 
+export interface ChatMessage {
+  readonly from: "assistant" | "farmer";
+  readonly text: string;
+}
+
 export interface Quote {
   readonly text: string;
   readonly name: string;
@@ -97,12 +102,15 @@ export const nav = {
 export const hero = {
   eyebrow: "Industrial software, made in Egypt",
   title: "Run the plant on facts, not phone calls.",
+  /** Word in the title that gets the single Kiln underline. */
+  titleEmphasis: "facts",
   sub: "Billion builds AI and operations software for Egyptian manufacturers: production tracking, predictive maintenance, quality control and planning that work on the floor from day one, with a payback you can measure.",
   primaryCta: "Book a plant walkthrough",
   secondaryCta: { label: "See how we work", href: "#how-we-work" },
   trustLine:
     "Egyptian team. On site across the industrial zones: 10th of Ramadan, 6th of October, Borg El Arab, Sadat City.",
   panel: {
+    index: "01",
     title: "What we look at first",
     items: [
       "stoppages",
@@ -187,15 +195,16 @@ export const proof = {
   pullLine:
     "What it proves for a factory: Arabic-language AI that non-technical people actually use, in the field, on ordinary phones. The same discipline goes on the shop floor.",
   link: { label: "Visit valor-labs.com", href: valorUrl },
-  /** Illustrative schematic dialogue (design/reference/NOTES.md), not a real transcript. */
+  /** Illustrative schematic dialogue about a crop question, not a real transcript. */
   chat: {
+    caption: "Illustration: a farmer asks the Ask Our Engineer assistant about a crop, in Egyptian Arabic.",
     header: "اسأل مهندسنا",
     wordmark: "Valor",
     messages: [
       { from: "assistant", text: "أهلاً، إزاي أقدر أساعدك؟" },
-      { from: "farmer", text: "عايز أعرف حالة الطقس عندي." },
-      { from: "assistant", text: "ابعتلي موقع الأرض علشان أجيبلك توقعات الطقس." },
-    ],
+      { from: "farmer", text: "ورق الطماطم عندي بدأ يصفر، أعمل إيه؟" },
+      { from: "assistant", text: "ابعتلي صورة للورق، وقولي آخر مرة سمدت الأرض إمتى." },
+    ] satisfies readonly ChatMessage[],
     inputPlaceholder: "اكتب سؤالك هنا",
   },
 } as const;
@@ -223,3 +232,6 @@ export const footer = {
 } as const;
 
 export const skipLinkLabel = "Skip to content";
+
+/** Screen-reader hint appended to links that open in a new tab. */
+export const newTabHint = "(opens in a new tab)";

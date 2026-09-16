@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Newsreader } from "next/font/google";
+import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Newsreader } from "next/font/google";
 import { Footer } from "@/components/site/Footer";
 import { Nav } from "@/components/site/Nav";
 import { brand, hero, skipLinkLabel } from "@/content/site";
@@ -20,6 +20,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/* Arabic face for the Proof chat still; Geist has no Arabic glyphs. Below the fold, so not preloaded. */
+const plexArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-plex-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "500"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -47,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${geistSans.variable} ${geistMono.variable}`}
+      className={`${newsreader.variable} ${geistSans.variable} ${geistMono.variable} ${plexArabic.variable}`}
     >
       <body>
         <a

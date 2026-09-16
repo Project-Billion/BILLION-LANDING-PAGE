@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { brand, nav, whatsappUrl } from "@/content/site";
+import { brand, nav, newTabHint, whatsappUrl } from "@/content/site";
 import { MobileMenu } from "./MobileMenu";
 
 /**
@@ -37,6 +37,7 @@ export function Nav() {
             </ul>
             <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
               {nav.whatsappLabel}
+              <span className="sr-only">{newTabHint}</span>
             </Button>
           </div>
 
