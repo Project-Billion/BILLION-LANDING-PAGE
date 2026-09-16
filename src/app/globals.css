@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Palette, type scale and layout values are pinned in
+ * docs/BRIEF.md section 4. Motion curves and durations come from the
+ * animate skill's tables (no invented values).
+ * `static` emits every variable so later sections can use them in plain CSS.
+ */
+@theme static {
+  /* Palette: one palette for the page; the Proof section reuses it inverted. */
+  --color-paper: #f5f2ec;
+  --color-paper-2: #ede8df;
+  --color-white: #ffffff;
+  --color-ink: #15130f;
+  --color-ink-2: #2b2822;
+  --color-graphite: #6b665c;
+  --color-rule: rgba(21, 19, 15, 0.1);
+  --color-rule-dark: rgba(245, 242, 236, 0.14);
+  --color-kiln: #b5502f;
+  --color-kiln-hover: #9e4327;
+  --color-kiln-tint: #f3e4dd;
+
+  /* Type scale */
+  --text-h1: clamp(2.75rem, 6vw, 5.5rem);
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: clamp(2rem, 4vw, 3.5rem);
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h3: clamp(1.5rem, 2.4vw, 2.125rem);
+  --text-h3--line-height: 1.1;
+  --text-h3--letter-spacing: -0.02em;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-ui: 0.9375rem;
+  --text-ui--line-height: 1.4;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.4;
+  --text-meta--letter-spacing: 0.08em;
+
+  /* Corner radius: 2 to 6px only. */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  /* Layout */
+  --container-page: 1280px;
+  --nav-height: 4.5rem;
+
+  /* Motion: curves (animate skill) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Motion: durations (animate skill duration table and recipes) */
+  --duration-press: 160ms;
+  --duration-hover: 150ms;
+  --duration-popover: 200ms;
+  --duration-modal: 250ms;
+  --duration-drawer: 500ms;
+  --duration-reveal: 600ms;
+  --stagger-step: 50ms;
+  --reveal-distance: 12px;
+}
+
+/* Font families map to next/font CSS variables set on <html> in layout.tsx. */
+@theme inline {
+  --font-display: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+  --font-arabic: var(--font-plex-arabic), "Segoe UI", "Geeza Pro", sans-serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink-2);
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    /* Anchor targets land below the floating nav. */
+    scroll-padding-top: calc(var(--nav-height) + 2rem + env(safe-area-inset-top, 0px));
+    /* mobile-native: no tap flash, no landscape font inflation. */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-paper);
+    color: var(--color-ink-2);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-kiln-tint);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-kiln);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  /* mobile-native: 16px minimum so iOS does not zoom on focus. */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+
+  /* mobile-native: controls fire immediately and do not select on long-press. */
+  button,
+  [role="button"],
+  .btn {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+@layer components {
+  /* Press feedback on :active works for touch and mouse (animate: button press recipe). */
+  .btn {
+    transition:
+      transform var(--duration-press) var(--ease-out),
+      background-color var(--duration-hover) ease,
+      border-color var(--duration-hover) ease,
+      color var(--duration-hover) ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Skip link: hidden until focused. */
+  .skip-link {
+    position: fixed;
+    top: calc(0.75rem + env(safe-area-inset-top, 0px));
+    left: calc(0.75rem + env(safe-area-inset-left, 0px));
+    z-index: 100;
+    transform: translateY(calc(-100% - 1.5rem));
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* Mobile sheet menu: visibility keeps it out of the tab order while closed. */
+  .nav-sheet {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.5rem);
+    transition:
+      opacity var(--duration-modal) var(--ease-out),
+      transform var(--duration-modal) var(--ease-out),
+      visibility 0s linear var(--duration-modal);
+  }
+
+  .nav-sheet[data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  /* Optional 3% film grain (BRIEF section 4), fixed and non-interactive. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/*
+ * Entrance motion (animate skill): rare/first-view tier, purpose = hierarchy on a
+ * marketing page. opacity + transform only, --ease-out for entering, 600ms reveal
+ * (scroll-reveal recipe), 50ms stagger. Runs once, never loops.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero: one staggered CSS animation on load; runs off the main thread while the page loads. */
+  .hero-in {
+    animation: rise-in var(--duration-reveal) var(--ease-out) both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--stagger-step));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  /* Sections: a transition, so a reveal that fires mid-scroll retargets instead of restarting. */
+  .reveal {
+    transition:
+      opacity var(--duration-reveal) var(--ease-out),
+      transform var(--duration-reveal) var(--ease-out);
+    transition-delay: calc(var(--reveal-index, 0) * var(--stagger-step));
+  }
+
+  .reveal:not([data-visible="true"]) {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+}
+
+/* BRIEF section 7: prefers-reduced-motion disables all motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .btn:active,
+  .nav-sheet {
+    transform: none;
+  }
+}
