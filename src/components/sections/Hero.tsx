@@ -53,6 +53,10 @@ function HeroTitle() {
  * 01 Hero: full-viewport dusk gradient behind the motto alone. The system schematic and
  * the "what we optimize first" panel moved to WhatWeBuild; the hyperspace canvas (design
  * spec section 11) sits in #hyperspace-slot, behind the text, above the gradient/grain.
+ * Hyperspace.tsx sets `data-hyperspace="travel" | "arrive" | "idle"` on this `section`
+ * as the intro runs; globals.css uses it to dim/enlarge (`.hero-bg-layer`, `#hero-title`)
+ * while travelling and ease back on drop-out. Absent (SSR, no JS, reduced motion) reads
+ * as idle: gradient/grain at their own resting opacity, motto at scale 1.
  */
 export function Hero() {
   return (
@@ -62,20 +66,20 @@ export function Hero() {
     >
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10"
+        className="hero-bg-layer absolute inset-0 -z-10"
         style={{
           background: "linear-gradient(180deg, #232a37 0%, #4f4f55 55%, #3a2e29 85%, var(--color-bg) 100%)",
         }}
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10"
+        className="hero-bg-layer absolute inset-0 -z-10"
         style={{
           backgroundImage: `url("${HERO_GRAIN_URL}")`,
           backgroundSize: "200px",
-          opacity: 0.08,
           mixBlendMode: "overlay",
-        }}
+          "--layer-rest-opacity": 0.08,
+        } as CSSProperties}
       />
       {/* Hyperspace starfield (design spec section 11): runs once on page load, about 4 s,
           as soon as the hero is in view. */}

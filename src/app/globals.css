@@ -209,6 +209,16 @@
 }
 
 /*
+ * Hyperspace arrival (design spec section 11): resting opacity per background layer,
+ * independent of motion preference — the grain must stay at its own subtle opacity
+ * (--layer-rest-opacity) even when the JS intro never runs (reduced motion, no JS).
+ * The transition and the travel/arrive dim/undim live in the `no-preference` block below.
+ */
+.hero-bg-layer {
+  opacity: var(--layer-rest-opacity, 1);
+}
+
+/*
  * Entrance motion (animate skill): rare/first-view tier, purpose = hierarchy on a
  * marketing page. opacity + transform only, --ease-out for entering, 600ms scroll reveal
  * (scroll-reveal recipe), 50ms stagger. Runs once, never loops.
@@ -240,6 +250,42 @@
   .hero-word {
     animation: hero-word-rise 700ms var(--ease-out) both;
     animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  /*
+   * Hyperspace arrival (design spec section 11): while the intro travels, the dusk
+   * gradient/grain dim and the motto enlarges slightly; on drop-out both ease back to
+   * rest (.hero-bg-layer's resting opacity is set unconditionally above, near .wwb-chevron,
+   * so it still applies under reduced motion). transform + opacity only, and never opacity
+   * on the H1, so LCP is unaffected. No `data-hyperspace` attribute (SSR, no JS, reduced
+   * motion) reads as idle: resting opacity, motto at scale 1 — each rule's default target,
+   * so no extra idle selector is needed.
+   */
+  .hero-bg-layer {
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  #hero-title {
+    transform: scale(1);
+    transition: transform 700ms var(--ease-out);
+  }
+
+  [data-hyperspace="travel"] .hero-bg-layer {
+    opacity: 0.15;
+    transition-duration: 300ms;
+  }
+
+  [data-hyperspace="travel"] #hero-title {
+    transform: scale(1.05);
+    transition-duration: 300ms;
+  }
+
+  [data-hyperspace="arrive"] .hero-bg-layer {
+    transition-duration: 900ms;
+  }
+
+  [data-hyperspace="arrive"] #hero-title {
+    transition-duration: 700ms;
   }
 
   @keyframes nav-pill-in {
