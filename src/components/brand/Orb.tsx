@@ -60,11 +60,11 @@ export function Orb({ className = "" }: { className?: string }) {
       aria-hidden="true"
       className={`relative inline-grid size-[0.42em] place-items-center align-baseline ${className}`}
     >
-      <span className={`absolute inset-0 rounded-full bg-kiln ${showOrb && ready ? "invisible" : ""}`} />
+      <span className={`absolute inset-0 rounded-full bg-fg ${showOrb && ready ? "invisible" : ""}`} />
       {showOrb && (
         <ThinkingOrb
           state="breathing"
-          theme="light"
+          theme="dark"
           size={size <= 32 ? 20 : 64}
           paused={!inView}
           className="absolute inset-0"

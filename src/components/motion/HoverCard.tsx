@@ -18,7 +18,7 @@ export function HoverCard({ children, className = "" }: HoverCardProps) {
 
   return (
     <m.div
-      className={`card-beam flex w-full flex-col overflow-hidden rounded-sm border border-rule p-7 md:p-10 ${className}`}
+      className={`card-beam flex w-full flex-col overflow-hidden rounded-lg border border-rule p-7 md:p-10 ${className}`}
       whileHover={enabled ? { y: -3 } : undefined}
       transition={enabled ? { type: "spring", stiffness: 300, damping: 24 } : { duration: 0 }}
     >

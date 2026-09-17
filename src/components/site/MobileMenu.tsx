@@ -104,7 +104,7 @@ export function MobileMenu() {
         aria-controls={sheetId}
         aria-label={open ? nav.menuCloseLabel : nav.menuOpenLabel}
         onClick={() => setOpen((value) => !value)}
-        className="btn relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm px-3 font-mono text-meta uppercase text-ink"
+        className="btn relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm px-3 font-mono text-meta uppercase text-fg"
       >
         <span aria-hidden="true">{open ? nav.menuCloseText : nav.menuOpenText}</span>
       </button>
@@ -113,7 +113,7 @@ export function MobileMenu() {
         id={sheetId}
         data-open={open}
         aria-hidden={!open}
-        className="nav-sheet fixed inset-x-0 top-0 z-0 flex h-dvh flex-col overscroll-contain bg-paper px-5 pt-[calc(var(--nav-height)+3rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
+        className="nav-sheet fixed inset-x-0 top-0 z-0 flex h-dvh flex-col overscroll-contain bg-bg px-5 pt-[calc(var(--nav-height)+3rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
       >
         <ul className="flex flex-col border-t border-rule">
           {nav.links.map((link) => (
@@ -121,7 +121,7 @@ export function MobileMenu() {
               <a
                 href={link.href}
                 onClick={close}
-                className="flex min-h-16 items-center font-display text-[2rem] leading-none tracking-[-0.02em] text-ink"
+                className="flex min-h-16 items-center font-display text-[2rem] leading-none tracking-[-0.02em] text-fg"
               >
                 {link.label}
               </a>

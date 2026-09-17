@@ -160,7 +160,7 @@ export function VitalValue({ metric }: { metric: VitalKey }) {
 
   const shownValue = tweenValue ?? reading.value;
   const ratingClassName =
-    reading.rating === "good" ? "text-paper" : "text-paper underline decoration-kiln decoration-2 underline-offset-4";
+    reading.rating === "good" ? "text-fg" : "text-fg underline decoration-kiln decoration-2 underline-offset-4";
 
   return (
     <span role="status" aria-live="polite" className={wrapperClassName}>

@@ -12,7 +12,7 @@ import { howItWorks } from "@/content/site";
 export function HowItWorks() {
   const { section, steps } = howItWorks;
   return (
-    <section id={section.id} aria-labelledby={`${section.id}-title`} className="py-24 lg:py-40">
+    <section id={section.id} aria-labelledby={`${section.id}-title`} className="py-40 lg:py-56">
       <Container>
         <SectionLabel as="h2" id={`${section.id}-title`} index={section.index} label={section.label} />
 
@@ -33,11 +33,11 @@ export function HowItWorks() {
                     index={i}
                     className={`relative before:absolute before:top-2.5 before:-left-9 before:size-2 before:bg-kiln lg:before:hidden ${textAbove ? "lg:row-start-1 lg:self-end lg:pb-6" : "lg:row-start-3 lg:pt-6"}`}
                   >
-                    <span aria-hidden="true" className="font-mono text-meta text-ink lg:hidden">
+                    <span aria-hidden="true" className="font-mono text-meta text-fg lg:hidden">
                       {step.index}
                     </span>
                     <h3 className="mt-2 text-[clamp(1.625rem,2.3vw,2rem)] leading-[1.1] lg:mt-0">{step.title}</h3>
-                    <p className="mt-4 max-w-[34ch] text-body text-ink-2">{step.body}</p>
+                    <p className="mt-4 max-w-[34ch] text-body text-fg-2">{step.body}</p>
                   </Reveal>
                 </li>
               );
