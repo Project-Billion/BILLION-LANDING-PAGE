@@ -67,11 +67,11 @@ export interface SiteConfig {
 /** Placeholders the owner must replace before launch (BRIEF section 6). */
 export const siteConfig: SiteConfig = {
   contact: {
-    whatsappE164: "+201000000000",
-    email: "hello@billion.example",
+    whatsappE164: "+201018683531",
+    email: "billion-solution@hotmail.com",
   },
   social: {
-    linkedin: "https://www.linkedin.com/company/billion",
+    linkedin: "https://www.linkedin.com/company/billioneg",
   },
   proof: {
     quote: null,
