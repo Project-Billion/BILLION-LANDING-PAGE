@@ -32,12 +32,12 @@ export function WhatWeBuild() {
             {items.map((item, i) => (
               <li key={item.title} role="listitem">
                 <Reveal index={i} className="wwb-row">
-                  <p className="flex items-baseline justify-between gap-4">
-                    <span className="text-h3 font-medium text-fg">{item.title}</span>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="text-h3 font-medium text-fg">{item.title}</h3>
                     <span aria-hidden="true" className="wwb-chevron shrink-0 text-xl text-fg-2">
                       &rsaquo;
                     </span>
-                  </p>
+                  </div>
                   <p className="mt-3 max-w-[46ch] text-body text-fg-2">{item.body}</p>
                 </Reveal>
               </li>

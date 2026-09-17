@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Orb } from "@/components/brand/Orb";
+import { Hyperspace } from "@/components/hero/Hyperspace";
 import { Container } from "@/components/ui/Container";
 import { hero } from "@/content/site";
 
@@ -27,18 +28,22 @@ function HeroTitle() {
         ))}
       </span>{" "}
       <span className="block">
-        {secondLine.map((word, index) => (
-          <span key={`${word}-${index}`}>
-            {index > 0 ? " " : null}
-            <span
-              className="hero-word inline-block"
-              style={{ "--i": firstLine.length + index } as CSSProperties}
-            >
-              {word}
+        {secondLine.map((word, index) => {
+          const isLast = index === secondLine.length - 1;
+          return (
+            <span key={`${word}-${index}`}>
+              {index > 0 ? " " : null}
+              <span
+                id={isLast ? "hero-billion" : undefined}
+                className={`hero-word inline-block${isLast ? " cursor-default" : ""}`}
+                style={{ "--i": firstLine.length + index } as CSSProperties}
+              >
+                {word}
+              </span>
+              {isLast ? <Orb /> : null}
             </span>
-            {index === secondLine.length - 1 ? <Orb /> : null}
-          </span>
-        ))}
+          );
+        })}
       </span>
     </h1>
   );
@@ -46,8 +51,8 @@ function HeroTitle() {
 
 /**
  * 01 Hero: full-viewport dusk gradient behind the motto alone. The system schematic and
- * the "what we optimize first" panel move to WhatWeBuild; the hyperspace canvas (design
- * spec section 11) mounts into #hyperspace-slot in a later task.
+ * the "what we optimize first" panel moved to WhatWeBuild; the hyperspace canvas (design
+ * spec section 11) sits in #hyperspace-slot, behind the text, above the gradient/grain.
  */
 export function Hero() {
   return (
@@ -72,8 +77,11 @@ export function Hero() {
           mixBlendMode: "overlay",
         }}
       />
-      {/* Reserved for the hyperspace starfield canvas (design spec section 11, later task). */}
-      <div id="hyperspace-slot" aria-hidden="true" className="absolute inset-0 -z-10" />
+      {/* Hyperspace starfield (design spec section 11): idle until the pointer, focus or a
+          touch tap reaches the word "Billion" (#hero-billion, below). */}
+      <div id="hyperspace-slot" aria-hidden="true" className="absolute inset-0 -z-10">
+        <Hyperspace triggerId="hero-billion" />
+      </div>
 
       <Container>
         <HeroTitle />

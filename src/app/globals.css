@@ -59,7 +59,6 @@
   --duration-modal: 250ms;
   --duration-drawer: 500ms;
   --duration-reveal: 600ms;
-  --duration-hero: 400ms;
   --stagger-step: 50ms;
   --reveal-distance: 12px;
 }
@@ -212,15 +211,8 @@
 /*
  * Entrance motion (animate skill): rare/first-view tier, purpose = hierarchy on a
  * marketing page. opacity + transform only, --ease-out for entering, 600ms scroll reveal
- * (scroll-reveal recipe), a shorter 400ms hero entrance, 50ms stagger. Runs once, never loops.
+ * (scroll-reveal recipe), 50ms stagger. Runs once, never loops.
  */
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(var(--reveal-distance));
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   @keyframes draw-wipe {
     from { clip-path: inset(0 100% 0 0); }
@@ -229,7 +221,6 @@
 
   /* No-JS visitors see the complete schematic immediately. */
   @media (scripting: enabled) {
-    .hero-in .draw-stage,
     .reveal[data-visible="true"] .draw-stage {
       clip-path: inset(0 100% 0 0);
       animation: draw-wipe 520ms var(--ease-out) both;
@@ -249,12 +240,6 @@
   .hero-word {
     animation: hero-word-rise 700ms var(--ease-out) both;
     animation-delay: calc(var(--i, 0) * 70ms);
-  }
-
-  /* Hero: one staggered CSS animation on load; runs off the main thread while the page loads. */
-  .hero-in {
-    animation: rise-in var(--duration-hero) var(--ease-out) both;
-    animation-delay: calc(var(--reveal-index, 0) * var(--stagger-step));
   }
 
   @keyframes nav-pill-in {
