@@ -235,13 +235,13 @@ element, hover-only loops, reduced motion static, no-JS complete.
 
 ## 11. Hyperspace (owner request, 2026-09-17)
 
-When the pointer enters the word "Billion" in the hero (or the word is tapped
-on touch, or focused via keyboard), the hero background jumps to light speed:
-a canvas starfield behind the text where stars accelerate outward from the
-centre and stretch into streaks, then ease back and fade within about a second
-of the pointer leaving. Implementation: one `<canvas>` (`aria-hidden`) sized to
-the hero, devicePixelRatio-aware, at most 400 stars, requestAnimationFrame only
-while active or settling, idle otherwise (a static sparse starfield is drawn
-once); touch tap runs a 1.5 s burst; reduced motion shows the static stars and
-never animates; paused off-screen; zero dependencies. The word gets
-`cursor: default`, no layout change on hover.
+On page load, as soon as the hero is in view, the hero background jumps to
+light speed once: a canvas starfield behind the text where stars accelerate
+outward from the centre and stretch into streaks, holds at full speed, then
+eases back and fades to the static field — about 4 s total. Implementation:
+one `<canvas>` (`aria-hidden`) sized to the hero, devicePixelRatio-aware, at
+most 400 stars, requestAnimationFrame only while running or settling, idle
+otherwise (a static sparse starfield is drawn once); runs at most once per
+page load; reduced motion shows the static stars and never animates; paused
+off-screen (and does not resume if the hero leaves view mid-run); zero
+dependencies.

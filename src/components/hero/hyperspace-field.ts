@@ -37,9 +37,12 @@ export interface ProjectedStreak {
 export const IDLE_STAR_COUNT = 120;
 export const MAX_ACTIVE_STARS = 400;
 export const MAX_DPR = 2;
-export const ACTIVATE_MS = 600;
-export const DEACTIVATE_MS = 900;
-export const TOUCH_BURST_MS = 1500;
+/** Ramp-up to full speed, on mount, once the hero is in view. */
+export const ACTIVATE_MS = 300;
+/** How long the field holds at full speed before easing back down. */
+export const HOLD_MS = 2500;
+/** Ease back down to idle. */
+export const DEACTIVATE_MS = 1200;
 
 /** Stars spawn between these two z depths (1 = far plane) and respawn once past NEAR_Z. */
 const FAR_Z = 1;
