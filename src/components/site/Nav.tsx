@@ -7,7 +7,7 @@ import { MobileMenu } from "./MobileMenu";
 import { useFloatingNav } from "./useFloatingNav";
 
 const linkClass =
-  "inline-flex min-h-11 items-center px-3 font-mono text-meta uppercase text-fg-2 transition-colors duration-(--duration-hover) hover:text-fg";
+  "inline-flex min-h-11 items-center px-3 font-sans text-sm font-normal normal-case text-fg-2 transition-colors duration-(--duration-hover) hover:text-fg";
 
 function Wordmark() {
   return (

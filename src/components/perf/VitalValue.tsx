@@ -13,6 +13,7 @@ import {
   subscribe,
   type VitalKey,
   type VitalRating,
+  type VitalReading,
 } from "./vitals-store";
 
 const RATING_WORD: Record<VitalRating, string> = {
@@ -38,6 +39,47 @@ const READOUT_MIN_WIDTH = "min-w-[22ch]";
 
 /** How long the visually-hidden announcement waits for the metric to go quiet before it updates. */
 const ANNOUNCE_DEBOUNCE_MS = 1_000;
+
+/**
+ * Targets the progress bar measures against (T9 spec). These mirror the display strings in
+ * `content/site.ts`'s `performance.vitals[].target` ("≤ 2.5 s", "≤ 0.1", "≤ 200 ms") as raw
+ * numbers in each metric's own unit (ms for LCP/INP, unitless for CLS).
+ */
+const VITAL_TARGET: Record<VitalKey, number> = {
+  LCP: 2500,
+  CLS: 0.1,
+  INP: 200,
+};
+
+/** How far past the target the track still shows movement before the fill caps at 100%. */
+const BAR_OVERSHOOT_CAP = 1.25;
+
+/** 0 while measuring; otherwise min(value / target, 1.25) / 1.25, i.e. the fill fraction (0–1). */
+function barFraction(metric: VitalKey, reading: VitalReading): number {
+  if (!isSettledVital(reading)) return 0;
+  const ratio = reading.value / VITAL_TARGET[metric];
+  return Math.min(ratio, BAR_OVERSHOOT_CAP) / BAR_OVERSHOOT_CAP;
+}
+
+/**
+ * Progress track for one vital, rendered under the row (Performance's floating card): fg fill
+ * while at or under target, ember once over. Lives here, not in Performance.tsx, so the store
+ * and the target numbers stay in one place. Width transitions via CSS; reduced motion collapses
+ * that transition to near-zero globally (see globals.css), so the bar still ends up static.
+ */
+function VitalBar({ metric, reading }: { metric: VitalKey; reading: VitalReading }) {
+  const fraction = barFraction(metric, reading);
+  const overTarget = isSettledVital(reading) && reading.value > VITAL_TARGET[metric];
+
+  return (
+    <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-0.5 bg-rule">
+      <div
+        className={`h-full transition-[width] duration-[400ms] ease-(--ease-out) ${overTarget ? "bg-ember" : "bg-fg"}`}
+        style={{ width: `${fraction * 100}%` }}
+      />
+    </div>
+  );
+}
 
 /**
  * Rounding never flatters a rating: LCP rounds up to the next 10 ms then shows two-decimal
@@ -72,7 +114,13 @@ function vitalLabel(metric: VitalKey): string {
  * shift, and re-announcing on each one would be noisy, so it only updates once the metric has
  * been quiet for a second.
  */
-export function VitalValue({ metric }: { metric: VitalKey }) {
+interface VitalValueProps {
+  metric: VitalKey;
+  /** Renders the target-relative progress track under the row (Performance's floating card). */
+  bar?: boolean;
+}
+
+export function VitalValue({ metric, bar = false }: VitalValueProps) {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const reading = snapshot[metric];
   const preference = useMotionPreference();
@@ -151,10 +199,13 @@ export function VitalValue({ metric }: { metric: VitalKey }) {
 
   if (!hasSettledReading) {
     return (
-      <span role="status" aria-live="polite" className={wrapperClassName}>
-        <span aria-hidden="true">{waitingText}</span>
-        <span className="sr-only">{announcement}</span>
-      </span>
+      <>
+        <span role="status" aria-live="polite" className={wrapperClassName}>
+          <span aria-hidden="true">{waitingText}</span>
+          <span className="sr-only">{announcement}</span>
+        </span>
+        {bar ? <VitalBar metric={metric} reading={reading} /> : null}
+      </>
     );
   }
 
@@ -163,15 +214,18 @@ export function VitalValue({ metric }: { metric: VitalKey }) {
     reading.rating === "good" ? "text-fg" : "text-fg underline decoration-kiln decoration-2 underline-offset-4";
 
   return (
-    <span role="status" aria-live="polite" className={wrapperClassName}>
-      <span className="whitespace-nowrap">
-        <span aria-hidden="true">{formatMetric(metric, shownValue)}</span>
-        <span aria-hidden="true"> &middot; </span>
-        <span aria-hidden="true" data-rating={RATING_ATTR[reading.rating]} className={ratingClassName}>
-          {ratingWord}
+    <>
+      <span role="status" aria-live="polite" className={wrapperClassName}>
+        <span className="whitespace-nowrap">
+          <span aria-hidden="true">{formatMetric(metric, shownValue)}</span>
+          <span aria-hidden="true"> &middot; </span>
+          <span aria-hidden="true" data-rating={RATING_ATTR[reading.rating]} className={ratingClassName}>
+            {ratingWord}
+          </span>
         </span>
+        <span className="sr-only">{announcement}</span>
       </span>
-      <span className="sr-only">{announcement}</span>
-    </span>
+      {bar ? <VitalBar metric={metric} reading={reading} /> : null}
+    </>
   );
 }

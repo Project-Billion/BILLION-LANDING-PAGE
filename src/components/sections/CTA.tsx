@@ -18,7 +18,7 @@ export function CTA() {
           <h2 id={`${section.id}-title`} className="text-h2">
             {cta.title}
           </h2>
-          <p className="mx-auto mt-8 max-w-[46rem] text-body text-fg-2">{cta.body}</p>
+          <p className="mx-auto mt-8 max-w-[50ch] text-body text-fg-2">{cta.body}</p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row sm:gap-6">
             <Magnetic>
               <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer" className="w-full">

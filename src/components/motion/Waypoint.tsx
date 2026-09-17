@@ -21,10 +21,10 @@ export function Waypoint({ index, textAbove }: { index: string; textAbove: boole
   return (
     <Reveal index={Number(index) - 1} className="relative h-22 row-start-2">
       <div aria-hidden="true">
-        <span className="absolute top-[40px] left-4 size-2 bg-kiln" />
+        <span className="absolute top-[40px] left-4 size-2 bg-fg" />
         <span className={`absolute left-5 w-px bg-fg-2/60 ${textAbove ? "top-[20px] h-5" : "top-[48px] h-5"}`} />
         <span
-          className={`absolute left-5 -translate-x-1/2 font-mono text-meta leading-none text-fg ${textAbove ? "top-[4px]" : "top-[72px]"}`}
+          className={`absolute left-5 -translate-x-1/2 font-mono text-meta leading-none text-fg-2 ${textAbove ? "top-[4px]" : "top-[72px]"}`}
         >
           {index}
         </span>

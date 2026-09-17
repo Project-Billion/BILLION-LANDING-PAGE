@@ -53,7 +53,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden"
+      className="relative isolate flex min-h-[100svh] items-center justify-center overflow-hidden"
     >
       <div
         aria-hidden="true"

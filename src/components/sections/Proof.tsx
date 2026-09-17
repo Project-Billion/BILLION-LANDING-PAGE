@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/motion/Reveal";
+import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ArrowUpRight } from "@/components/ui/Icons";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -50,13 +51,13 @@ function ChatStill() {
 }
 
 /**
- * 05 Proof: chat still left, narrative right (5/7 columns) from lg up;
+ * 05 Proof: story left, chat still right (7/5 columns) from lg up;
  * below lg the DOM order reads label, eyebrow, title, body, chat, pull line, link.
  */
 export function Proof() {
   const { section } = proof;
   const quote = siteConfig.proof.quote;
-  const storyColumn = "lg:col-span-7 lg:col-start-6";
+  const storyColumn = "lg:col-span-7 lg:col-start-1";
 
   return (
     <section id={section.id} aria-labelledby={`${section.id}-title`} className="py-40 lg:py-56">
@@ -76,14 +77,12 @@ export function Proof() {
             <p className="max-w-[62ch] text-body text-fg-2">{proof.body}</p>
           </Reveal>
 
-          <Reveal className="lg:col-span-5 lg:col-start-1 lg:row-span-5 lg:row-start-1 lg:self-center">
+          <Reveal className="lg:col-span-5 lg:col-start-8 lg:row-span-5 lg:row-start-1 lg:self-center">
             <ChatStill />
           </Reveal>
 
           <Reveal index={3} className={storyColumn}>
-            <p className="border-t border-rule pt-8 font-display text-2xl leading-[1.35] text-fg">
-              {proof.pullLine}
-            </p>
+            <p className="border-t border-rule pt-8 text-sub text-fg">{proof.pullLine}</p>
             {quote ? (
               <figure className="mt-8">
                 <blockquote className="font-display text-xl leading-[1.4] text-fg">
@@ -97,16 +96,11 @@ export function Proof() {
           </Reveal>
 
           <Reveal index={4} className={storyColumn}>
-            <a
-              href={proof.link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center gap-3 text-ui text-fg underline decoration-fg-2 underline-offset-4 transition-colors duration-(--duration-hover) hover:decoration-fg"
-            >
+            <Button href={proof.link.href} variant="secondary" target="_blank" rel="noopener noreferrer">
               {proof.link.label}
               <ArrowUpRight className="text-ember" />
               <span className="sr-only">{newTabHint}</span>
-            </a>
+            </Button>
           </Reveal>
         </div>
       </Container>

@@ -31,9 +31,9 @@ export function HowItWorks() {
                   <Waypoint index={step.index} textAbove={textAbove} />
                   <Reveal
                     index={i}
-                    className={`relative before:absolute before:top-2.5 before:-left-9 before:size-2 before:bg-kiln lg:before:hidden ${textAbove ? "lg:row-start-1 lg:self-end lg:pb-6" : "lg:row-start-3 lg:pt-6"}`}
+                    className={`relative before:absolute before:top-2.5 before:-left-9 before:size-2 before:bg-fg lg:before:hidden ${textAbove ? "lg:row-start-1 lg:self-end lg:pb-6" : "lg:row-start-3 lg:pt-6"}`}
                   >
-                    <span aria-hidden="true" className="font-mono text-meta text-fg lg:hidden">
+                    <span aria-hidden="true" className="font-mono text-meta text-fg-2 lg:hidden">
                       {step.index}
                     </span>
                     <h3 className="mt-2 text-[clamp(1.625rem,2.3vw,2rem)] leading-[1.1] lg:mt-0">{step.title}</h3>
