@@ -3,24 +3,26 @@
 import { useEffect, useRef } from "react";
 import { useMotionPreference } from "@/components/motion/useMotionPreference";
 import {
-  ACTIVATE_MS, DEACTIVATE_MS, MAX_ACTIVE_STARS, MAX_DPR, TOUCH_BURST_MS,
+  ACTIVATE_MS, DEACTIVATE_MS, HOLD_MS, MAX_ACTIVE_STARS, MAX_DPR,
   createIdleField, createStarField, mulberry32, stepStar, transitionIntensity,
   type IdlePoint, type ProjectedStreak, type Star,
 } from "@/components/hero/hyperspace-field";
 
 /** z units consumed per second at full intensity — a tuned visual constant, not a physical unit. */
-const MAX_SPEED_PER_SECOND = 1.1;
+const MAX_SPEED_PER_SECOND = 2.2;
 /** Motion blur: painted over the previous frame instead of clearing it, so streaks trail off. */
-const TRAIL_FADE = "rgba(18, 18, 18, 0.35)";
+const TRAIL_FADE = "rgba(18, 18, 18, 0.28)";
 const STREAK_RGB = "255, 255, 255";
 const WARM_STREAK_RGB = "224, 128, 90";
 
 /**
- * Hyperspace starfield behind the hero motto (design spec section 11): idle until the
- * pointer, touch or focus reaches `triggerId`, then eases to light speed and back.
- * Static under reduced motion; paused off-screen; cleans up on unmount.
+ * Hyperspace starfield behind the hero motto (design spec section 11): runs once, on page
+ * load, as soon as the hero is in view — ramps to light speed, holds, then eases back to the
+ * static idle field. Total run is about 4 s (`ACTIVATE_MS` + `HOLD_MS` + `DEACTIVATE_MS`).
+ * Static under reduced motion; if the hero leaves view mid-run it stops and does not resume
+ * (runs at most once per page load); cleans up on unmount.
  */
-export function Hyperspace({ triggerId }: { triggerId: string }) {
+export function Hyperspace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reducedMotion = useMotionPreference();
 
@@ -37,13 +39,13 @@ export function Hyperspace({ triggerId }: { triggerId: string }) {
     let width = 0, height = 0;
     let idleField: IdlePoint[] = [];
     let inView = true;
-    let active = false;
+    let introPlayed = false;
     let intensity = 0;
     let transitionFrom = 0, transitionTo = 0, transitionStart = 0;
     let transitionDuration = ACTIVATE_MS;
     let rafId: number | null = null;
     let lastFrame = 0;
-    let touchBurstTimer: number | null = null;
+    let holdTimer: number | null = null;
 
     const drawIdle = () => {
       ctx.clearRect(0, 0, width, height);
@@ -66,7 +68,7 @@ export function Hyperspace({ triggerId }: { triggerId: string }) {
       canvas.height = Math.max(1, Math.round(height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       idleField = createIdleField(width, height);
-      if (!active && transitionTo === 0) drawIdle();
+      if (rafId === null) drawIdle();
     };
 
     const ensureRunning = () => {
@@ -120,45 +122,25 @@ export function Hyperspace({ triggerId }: { triggerId: string }) {
       ensureRunning();
     };
 
-    const activate = () => {
-      active = true;
-      beginTransition(1, ACTIVATE_MS);
-    };
-    const deactivate = () => {
-      if (!active) return;
-      active = false;
-      beginTransition(0, DEACTIVATE_MS);
-    };
-    const clearTouchBurst = () => {
-      if (touchBurstTimer === null) return;
-      window.clearTimeout(touchBurstTimer);
-      touchBurstTimer = null;
+    const clearHoldTimer = () => {
+      if (holdTimer === null) return;
+      window.clearTimeout(holdTimer);
+      holdTimer = null;
     };
 
-    const onPointerHover = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" && event.pointerType !== "pen") return;
-      if (event.type === "pointerenter") activate();
-      else deactivate();
-    };
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== "touch") return;
-      clearTouchBurst();
-      activate();
-      touchBurstTimer = window.setTimeout(() => {
-        touchBurstTimer = null;
-        deactivate();
-      }, TOUCH_BURST_MS);
+    /** Ramp to full speed, hold, then ease back to idle. Runs at most once per mount. */
+    const runIntro = () => {
+      if (introPlayed || reducedMotion !== false) return;
+      introPlayed = true;
+      beginTransition(1, ACTIVATE_MS);
+      holdTimer = window.setTimeout(() => {
+        holdTimer = null;
+        beginTransition(0, DEACTIVATE_MS);
+      }, ACTIVATE_MS + HOLD_MS);
     };
 
     resize();
     drawIdle();
-
-    const trigger = reducedMotion === false ? document.getElementById(triggerId) : null;
-    trigger?.addEventListener("pointerenter", onPointerHover);
-    trigger?.addEventListener("pointerleave", onPointerHover);
-    trigger?.addEventListener("focus", activate);
-    trigger?.addEventListener("blur", deactivate);
-    trigger?.addEventListener("pointerdown", onPointerDown);
 
     const resizeObserver = new ResizeObserver(resize);
     if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
@@ -167,7 +149,7 @@ export function Hyperspace({ triggerId }: { triggerId: string }) {
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;
       if (!inView) {
-        active = false;
+        clearHoldTimer();
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
           rafId = null;
@@ -175,23 +157,17 @@ export function Hyperspace({ triggerId }: { triggerId: string }) {
         return;
       }
       drawIdle();
-      const settled = transitionTo === 0 && performance.now() - transitionStart >= transitionDuration;
-      if (!settled) ensureRunning();
+      runIntro();
     }, { threshold: 0 });
     if (section) intersectionObserver.observe(section);
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
-      clearTouchBurst();
+      clearHoldTimer();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      trigger?.removeEventListener("pointerenter", onPointerHover);
-      trigger?.removeEventListener("pointerleave", onPointerHover);
-      trigger?.removeEventListener("focus", activate);
-      trigger?.removeEventListener("blur", deactivate);
-      trigger?.removeEventListener("pointerdown", onPointerDown);
     };
-  }, [reducedMotion, triggerId]);
+  }, [reducedMotion]);
 
   return <canvas aria-hidden="true" ref={canvasRef} className="absolute inset-0 h-full w-full" />;
 }

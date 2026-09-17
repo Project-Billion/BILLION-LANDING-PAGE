@@ -77,10 +77,10 @@ export function Hero() {
           mixBlendMode: "overlay",
         }}
       />
-      {/* Hyperspace starfield (design spec section 11): idle until the pointer, focus or a
-          touch tap reaches the word "Billion" (#hero-billion, below). */}
+      {/* Hyperspace starfield (design spec section 11): runs once on page load, about 4 s,
+          as soon as the hero is in view. */}
       <div id="hyperspace-slot" aria-hidden="true" className="absolute inset-0 -z-10">
-        <Hyperspace triggerId="hero-billion" />
+        <Hyperspace />
       </div>
 
       <Container>
