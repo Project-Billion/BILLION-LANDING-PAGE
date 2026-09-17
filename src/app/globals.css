@@ -212,6 +212,20 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-word-rise {
+    from {
+      transform: translateY(0.25em);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .hero-word {
+    animation: hero-word-rise 700ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
   /* Hero: one staggered CSS animation on load; runs off the main thread while the page loads. */
   .hero-in {
     animation: rise-in var(--duration-hero) var(--ease-out) both;
