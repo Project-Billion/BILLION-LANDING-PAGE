@@ -1,3 +1,4 @@
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
@@ -22,14 +23,18 @@ export function CTA() {
           </h2>
           <p className="mx-auto mt-8 max-w-[46rem] text-body text-ink-2">{cta.body}</p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row sm:gap-6">
-            <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
-              {cta.whatsappLabel}
-              <ArrowRight className="w-5" />
-              <span className="sr-only">{newTabHint}</span>
-            </Button>
-            <Button href={mailtoUrl()} variant="secondary" className="sm:min-w-44">
-              {cta.emailLabel}
-            </Button>
+            <Magnetic>
+              <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer" className="w-full">
+                {cta.whatsappLabel}
+                <ArrowRight className="w-5" />
+                <span className="sr-only">{newTabHint}</span>
+              </Button>
+            </Magnetic>
+            <Magnetic>
+              <Button href={mailtoUrl()} variant="secondary" className="w-full sm:min-w-44">
+                {cta.emailLabel}
+              </Button>
+            </Magnetic>
           </div>
           <p className="mt-6 font-mono text-meta uppercase text-graphite">{cta.responseNote}</p>
         </Reveal>

@@ -212,6 +212,31 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes draw-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  /* No-JS visitors see the complete schematic immediately. */
+  @media (scripting: enabled) {
+    .hero-in .draw-stage,
+    .reveal[data-visible="true"] .draw-stage {
+      clip-path: inset(0 100% 0 0);
+      animation: draw-wipe 520ms var(--ease-out) both;
+      animation-delay: calc(var(--draw-index, 0) * 110ms + 500ms);
+    }
+  }
+
+  @keyframes beam-spin {
+    to { --beam-angle: 360deg; }
+  }
+
+  .card-beam:hover::after,
+  .card-beam:focus-within::after {
+    opacity: 1;
+    animation: beam-spin 4s linear infinite;
+  }
+
   @keyframes hero-word-rise {
     from {
       transform: translateY(0.25em);
@@ -268,4 +293,31 @@
   .nav-sheet {
     transform: none;
   }
+
+}
+
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.card-beam {
+  position: relative;
+  isolation: isolate;
+}
+
+.card-beam::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--beam-angle), transparent 0 70%, var(--color-kiln) 85%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
 }

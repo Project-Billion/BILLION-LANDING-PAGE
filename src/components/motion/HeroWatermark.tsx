@@ -1,14 +1,13 @@
 "use client";
 
-import { useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useScroll, useTransform } from "motion/react";
 import * as m from "motion/react-m";
 import { useRef } from "react";
 import { useMotionPreference } from "@/components/motion/useMotionPreference";
 
 export function HeroWatermark() {
   const ref = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-  const preference = useMotionPreference() ?? reducedMotion;
+  const preference = useMotionPreference();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "-6%"]);
 
