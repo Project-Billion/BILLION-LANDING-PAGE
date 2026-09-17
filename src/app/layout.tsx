@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Newsreader } from "next/font/google";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Footer } from "@/components/site/Footer";
 import { Nav } from "@/components/site/Nav";
 import { brand, hero, skipLinkLabel } from "@/content/site";
@@ -59,18 +60,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${newsreader.variable} ${geistSans.variable} ${geistMono.variable} ${plexArabic.variable}`}
     >
       <body>
-        <a
-          href="#main"
-          className="skip-link btn inline-flex min-h-11 items-center rounded-sm bg-ink px-4 text-ui font-medium text-paper"
-        >
-          {skipLinkLabel}
-        </a>
-        <Nav />
-        <main id="main" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
-        <div className="grain" aria-hidden="true" />
+        <MotionProvider>
+          <a
+            href="#main"
+            className="skip-link btn inline-flex min-h-11 items-center rounded-sm bg-ink px-4 text-ui font-medium text-paper"
+          >
+            {skipLinkLabel}
+          </a>
+          <Nav />
+          <main id="main" tabIndex={-1} className="outline-none">
+            {children}
+          </main>
+          <Footer />
+          <div className="grain" aria-hidden="true" />
+        </MotionProvider>
       </body>
     </html>
   );

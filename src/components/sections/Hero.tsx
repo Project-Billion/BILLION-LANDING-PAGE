@@ -1,41 +1,60 @@
 import type { CSSProperties } from "react";
-import { ProductionLine } from "@/components/drawings/Schematics";
+import { Orb } from "@/components/brand/Orb";
+import { SystemSchematic } from "@/components/drawings/Schematics";
+import { HeroWatermark } from "@/components/motion/HeroWatermark";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ArrowRight } from "@/components/ui/Icons";
 import { hero, newTabHint, whatsappUrl } from "@/content/site";
 
 /**
- * Stagger position for the one on-load reveal (.hero-in in globals.css). Only the eyebrow, H1 and
- * lower panel animate; the lead paragraph and CTAs paint immediately because the paragraph is the
- * mobile LCP element and hiding it behind opacity delayed LCP (QA03).
+ * Stagger position for the one on-load reveal (.hero-in in globals.css).
+ * The headline stays fully static for LCP. Per QA03, the sub paragraph, CTA row, and
+ * trust line also paint immediately: the paragraph is the mobile LCP element, and
+ * hiding it behind an opacity animation delayed LCP by seconds. Only the eyebrow and
+ * the schematic/panel block keep the stagger.
  */
 function stagger(index: number): CSSProperties {
   return { "--reveal-index": index } as CSSProperties;
 }
 
-/** The H1 with a single Kiln underline under the emphasis word (decoration only, text stays Ink). */
+/** Two-line motto paints at full opacity; only the individual words translate. */
 function HeroTitle() {
-  const [before, after] = hero.title.split(hero.titleEmphasis);
+  const firstLine = hero.title.line1.split(" ");
+  const secondLine = hero.title.line2.split(" ");
   return (
-    <h1 id="hero-title" className="hero-in mt-5 max-w-[10.5em] text-h1 text-wrap" style={stagger(1)}>
-      {before}
-      <span className="underline decoration-kiln decoration-[0.04em] underline-offset-[0.14em] [text-decoration-skip-ink:none]">
-        {hero.titleEmphasis}
+    <h1 id="hero-title" className="mt-5 text-[clamp(3.25rem,10vw,8.5rem)] leading-[0.95] tracking-[-0.03em]">
+      <span className="block">
+        {firstLine.map((word, index) => (
+          <span key={`${word}-${index}`}>
+            {index > 0 ? " " : null}
+            <span className="hero-word inline-block" style={{ "--i": index } as CSSProperties}>{word}</span>
+          </span>
+        ))}
+      </span>{" "}
+      <span className="block">
+        {secondLine.map((word, index) => (
+          <span key={`${word}-${index}`}>
+            {index > 0 ? " " : null}
+            <span className="hero-word inline-block" style={{ "--i": firstLine.length + index } as CSSProperties}>
+              {index === secondLine.length - 1 ? <span className="text-kiln">{word}</span> : word}
+            </span>{index === secondLine.length - 1 ? <Orb /> : null}
+          </span>
+        ))}
       </span>
-      {after}
     </h1>
   );
 }
 
-/** 01 Hero: top-left editorial lead, then a full-width rule with the schematic and inspection note low-right. */
+/** 01 Hero: editorial motto, then a full-width rule with the system schematic and optimization panel. */
 export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
       className="pt-[calc(var(--nav-height)+3.5rem+env(safe-area-inset-top,0px))] pb-24 md:pt-[calc(var(--nav-height)+5.5rem)] lg:pb-32"
     >
-      <Container>
+      <Container className="relative isolate">
+        <HeroWatermark />
         <p className="hero-in font-mono text-meta uppercase text-ink-2" style={stagger(0)}>
           {hero.eyebrow}
         </p>
@@ -58,8 +77,11 @@ export function Hero() {
           {hero.trustLine}
         </p>
 
-        <div className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12" style={stagger(2)}>
-          <ProductionLine className="self-end text-ink-2 lg:col-span-8" />
+        <div
+          className="hero-in mt-12 grid gap-10 border-t border-rule pt-8 md:mt-14 lg:grid-cols-12 lg:gap-12"
+          style={stagger(1)}
+        >
+          <SystemSchematic className="self-end text-ink-2 lg:col-span-8" />
 
           <aside
             aria-labelledby="hero-panel-title"
