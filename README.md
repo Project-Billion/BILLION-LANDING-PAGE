@@ -1,16 +1,16 @@
 # Billion landing page
 
-Single-page marketing site for Billion, a Cairo-based software house with one obsession: performance optimized to the maximum. Billion solves problems across AI products, platforms, data systems, and operations software — and specializes in the hard problems nobody else wants. The design and copy brief lives in [docs/BRIEF.md](docs/BRIEF.md); reference mockups are in [design/reference/](design/reference/).
+Single-page marketing site for Billion, a Cairo-based software house with one obsession: performance optimized to the maximum. Billion solves problems across AI products, platforms, data systems, and operations software — and specializes in the hard problems nobody else wants. Dark single-background design with canvas-based interactive effects. The design and copy brief lives in [docs/BRIEF.md](docs/BRIEF.md); reference mockups are in [design/reference/](design/reference/).
 
 ## Stack
 
 - Next.js (App Router, TypeScript, `src/` directory, `@/*` import alias)
 - Tailwind CSS v4 (tokens in `src/app/globals.css` via `@theme`)
-- Fonts through `next/font/google`: Newsreader, Geist, Geist Mono
+- Fonts through `next/font/google`: Outfit, Geist Mono, IBM Plex Sans Arabic
 - motion (scroll and interaction animations with `domAnimation` only; ~15 kB gzip)
 - thinking-orbs (canvas-based animated thinking orb as the hero's full stop)
 - web-vitals (client-side Core Web Vitals measurement for the performance band)
-- border-beam (hover effect on the six solution cards)
+- Hyperspace canvas starfield effect on the hero (zero dependencies, `src/components/hero/`)
 - npm
 
 ## Develop
