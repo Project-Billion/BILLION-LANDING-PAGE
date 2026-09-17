@@ -3,17 +3,26 @@
 import { useEffect, useRef } from "react";
 import { useMotionPreference } from "@/components/motion/useMotionPreference";
 import {
-  ACTIVATE_MS, DEACTIVATE_MS, HOLD_MS, MAX_ACTIVE_STARS, MAX_DPR,
-  createIdleField, createStarField, mulberry32, stepStar, transitionIntensity,
+  ACTIVATE_MS, DEACTIVATE_MS, HOLD_MS, MAX_ACTIVE_STARS, MAX_DPR, SETTLE_FAST_MS,
+  createIdleField, createStarField, flashIntensity, mulberry32, settleIntensity,
+  stepStar, transitionIntensity,
   type IdlePoint, type ProjectedStreak, type Star,
 } from "@/components/hero/hyperspace-field";
 
 /** z units consumed per second at full intensity — a tuned visual constant, not a physical unit. */
 const MAX_SPEED_PER_SECOND = 2.2;
 /** Motion blur: painted over the previous frame instead of clearing it, so streaks trail off. */
-const TRAIL_FADE = "rgba(18, 18, 18, 0.28)";
+const TRAIL_FADE_ALPHA = 0.28;
+const TRAIL_FADE = `rgba(18, 18, 18, ${TRAIL_FADE_ALPHA})`;
 const STREAK_RGB = "255, 255, 255";
 const WARM_STREAK_RGB = "224, 128, 90";
+/** Centre-flash gradient: white at 35% alpha in the centre, transparent by 45% of the
+ * shorter viewport dimension. Alpha is animated by scaling `ctx.globalAlpha`, not by
+ * rebuilding the gradient, so it only needs recomputing on resize. */
+const FLASH_CENTRE_ALPHA = 0.35;
+const FLASH_RADIUS_FRACTION = 0.45;
+
+type HyperspaceState = "travel" | "arrive" | "idle";
 
 /**
  * Hyperspace starfield behind the hero motto (design spec section 11): runs once, on page
@@ -38,8 +47,10 @@ export function Hyperspace() {
 
     let width = 0, height = 0;
     let idleField: IdlePoint[] = [];
+    let flashGradient: CanvasGradient | null = null;
     let inView = true;
     let introPlayed = false;
+    let settling = false;
     let intensity = 0;
     let transitionFrom = 0, transitionTo = 0, transitionStart = 0;
     let transitionDuration = ACTIVATE_MS;
@@ -68,6 +79,13 @@ export function Hyperspace() {
       canvas.height = Math.max(1, Math.round(height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       idleField = createIdleField(width, height);
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.min(width, height) * FLASH_RADIUS_FRACTION;
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${FLASH_CENTRE_ALPHA})`);
+      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      flashGradient = gradient;
       if (rafId === null) drawIdle();
     };
 
@@ -78,6 +96,15 @@ export function Hyperspace() {
       }
     };
 
+    const section = canvas.closest("section");
+
+    /** Mirrors intro phase onto the section so CSS can dim/enlarge the world around the
+     * canvas (design spec section 11). No-op with no ancestor `section` (shouldn't happen
+     * in this layout, but the canvas must never throw for it). */
+    const setHyperspaceState = (state: HyperspaceState) => {
+      if (section) section.dataset.hyperspace = state;
+    };
+
     const frame = (now: number) => {
       if (!inView) {
         rafId = null;
@@ -86,11 +113,32 @@ export function Hyperspace() {
 
       const dtMs = lastFrame ? Math.min(now - lastFrame, 100) : 16;
       lastFrame = now;
+      const elapsed = now - transitionStart;
 
-      intensity = transitionIntensity(transitionFrom, transitionTo, now - transitionStart, transitionDuration);
+      intensity = settling
+        ? settleIntensity(transitionFrom, elapsed, transitionDuration)
+        : transitionIntensity(transitionFrom, transitionTo, elapsed, transitionDuration);
 
-      ctx.fillStyle = TRAIL_FADE;
-      ctx.fillRect(0, 0, width, height);
+      if (settling && elapsed < SETTLE_FAST_MS) {
+        // During the sharp first stretch of the settle phase, skip the translucent
+        // trail-fade (which blurs frame over frame) and clear fully instead, so the
+        // streaks' own deceleration — already contracting toward points as zDelta
+        // shrinks — reads crisply, and the arriving world underneath isn't masked by
+        // the opaque black the trail-fade would otherwise have built up by now.
+        ctx.clearRect(0, 0, width, height);
+      } else if (settling) {
+        // Soft tail: dissolve any residual streak pixels back to transparent instead of
+        // repainting translucent black, which would just re-accumulate to opaque and hide
+        // the hero-bg-layer/grain fade-up (design spec section 11) for the rest of settle.
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = `rgba(0, 0, 0, ${TRAIL_FADE_ALPHA})`;
+        ctx.fillRect(0, 0, width, height);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = TRAIL_FADE;
+        ctx.fillRect(0, 0, width, height);
+      }
 
       const zDelta = MAX_SPEED_PER_SECOND * intensity * (dtMs / 1000);
       const halfWidth = width / 2;
@@ -105,10 +153,23 @@ export function Hyperspace() {
         ctx.stroke();
       }
 
+      if (settling && flashGradient) {
+        const flash = flashIntensity(elapsed);
+        if (flash > 0) {
+          ctx.save();
+          ctx.globalAlpha = flash;
+          ctx.fillStyle = flashGradient;
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+        }
+      }
+
       const settled = transitionTo === 0 && now - transitionStart >= transitionDuration;
       if (settled) {
         rafId = null;
+        settling = false;
         drawIdle();
+        setHyperspaceState("idle");
         return;
       }
       rafId = requestAnimationFrame(frame);
@@ -132,9 +193,13 @@ export function Hyperspace() {
     const runIntro = () => {
       if (introPlayed || reducedMotion !== false) return;
       introPlayed = true;
+      settling = false;
+      setHyperspaceState("travel");
       beginTransition(1, ACTIVATE_MS);
       holdTimer = window.setTimeout(() => {
         holdTimer = null;
+        settling = true;
+        setHyperspaceState("arrive");
         beginTransition(0, DEACTIVATE_MS);
       }, ACTIVATE_MS + HOLD_MS);
     };
@@ -145,7 +210,6 @@ export function Hyperspace() {
     const resizeObserver = new ResizeObserver(resize);
     if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
 
-    const section = canvas.closest("section");
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;
       if (!inView) {
@@ -154,6 +218,12 @@ export function Hyperspace() {
           cancelAnimationFrame(rafId);
           rafId = null;
         }
+        settling = false;
+        intensity = 0;
+        transitionFrom = 0;
+        transitionTo = 0;
+        setHyperspaceState("idle");
+        drawIdle();
         return;
       }
       drawIdle();
@@ -166,6 +236,7 @@ export function Hyperspace() {
       clearHoldTimer();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      setHyperspaceState("idle");
     };
   }, [reducedMotion]);
 

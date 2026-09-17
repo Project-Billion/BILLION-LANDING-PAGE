@@ -175,3 +175,43 @@ export function transitionIntensity(from: number, to: number, elapsedMs: number,
   const t = durationMs <= 0 ? 1 : elapsedMs / durationMs;
   return from + (to - from) * easeOutCubic(t);
 }
+
+/** How much of the settle phase is the sharp initial speed drop (design spec section 11). */
+export const SETTLE_FAST_MS = 350;
+/** Fraction of the starting intensity still left once the fast-drop window ends. */
+const SETTLE_TAIL_START = 0.12;
+
+/**
+ * Deceleration curve for the settle phase (arrival): most of the speed drop happens
+ * within `SETTLE_FAST_MS` so the streaks visibly contract back into points, then a
+ * soft tail eases the small remainder down to zero over the rest of `durationMs`.
+ * Sharper than `transitionIntensity`'s single ease-out, by design — this only ever
+ * runs from a positive `from` down to zero.
+ */
+export function settleIntensity(from: number, elapsedMs: number, durationMs: number): number {
+  if (elapsedMs <= 0) return from;
+  if (elapsedMs >= durationMs) return 0;
+  const fastMs = Math.min(SETTLE_FAST_MS, durationMs);
+  const tailStart = from * SETTLE_TAIL_START;
+  if (elapsedMs <= fastMs) {
+    return from + (tailStart - from) * easeOutCubic(elapsedMs / fastMs);
+  }
+  const tailT = (elapsedMs - fastMs) / (durationMs - fastMs);
+  return tailStart * (1 - easeOutCubic(tailT));
+}
+
+/** Centre-flash rise time at the start of the settle phase (design spec section 11). */
+export const FLASH_RISE_MS = 120;
+/** Centre-flash fade-out time, immediately following the rise. */
+export const FLASH_FADE_MS = 600;
+
+/**
+ * Centre-flash intensity (0..1) at `elapsedMs` into the settle phase: rises over
+ * `FLASH_RISE_MS`, then fades back out over `FLASH_FADE_MS`. The caller scales a
+ * fixed-alpha radial gradient by this value, so 1 means the gradient's own peak alpha.
+ */
+export function flashIntensity(elapsedMs: number): number {
+  if (elapsedMs <= 0 || elapsedMs >= FLASH_RISE_MS + FLASH_FADE_MS) return 0;
+  if (elapsedMs <= FLASH_RISE_MS) return easeOutCubic(elapsedMs / FLASH_RISE_MS);
+  return 1 - easeOutCubic((elapsedMs - FLASH_RISE_MS) / FLASH_FADE_MS);
+}
