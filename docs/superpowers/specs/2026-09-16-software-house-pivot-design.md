@@ -172,3 +172,76 @@ reviews; the coordinator commits one commit per task.
 
 Real contact details (still owner-supplied placeholders, QA01), Arabic locale,
 privacy page, dark-mode theme, analytics, forms or any backend.
+
+## 10. Visual system v2 (owner decision, 2026-09-17)
+
+Reference: https://www.micro1.ai/. The owner wants "one clean background".
+This section supersedes the palette, typography, hero composition and section
+surfaces in sections 3 and 6. Copy (section 5), structure (section 4), the live
+vitals, the schematics, the orb, the scroll-drawn timeline and the magnetic
+buttons all stay. The paper look is retired. Note: the pivot up to the
+performance band was merged to `main` by the owner on 2026-09-17 (PR #3) with
+real contact details; v2 continues on branch `feat/dark-visual-system`.
+
+**Palette (one background for the whole page).** `--color-bg #121212`,
+`--color-bg-2 #171717` (cards), `--color-fg rgba(255,255,255,0.92)`,
+`--color-fg-2 #a3a3a3` (sublines, 7:1 on bg), `--color-rule rgba(255,255,255,0.10)`,
+accent `--color-kiln #b5502f` for fills and decoration only, `--color-ember #e0805a`
+for accent text (6.5:1 on bg). No colour bands, no inverted sections, no shadows;
+depth comes from soft radial glows in the background (`rgba(255,255,255,0.04)`)
+and from the hero gradient.
+
+**Typography.** Outfit (next/font/google, weights 400 and 500) for headings and
+body; Geist Mono stays for labels and numbers; IBM Plex Sans Arabic stays for
+the chat still. H1 `clamp(3.25rem, 8vw, 6rem)` weight 400, line-height 1.02,
+tracking -0.01em, fg at 92%; H2 `clamp(2.25rem, 4.5vw, 3.75rem)` weight 400,
+centred; sublines Outfit 400 at 1.25rem in fg-2, centred, max 60ch; body
+1.0625rem fg-2; meta as before.
+
+**Layout.** Content max 1200px; sections separated by whitespace only
+(160px mobile to 224px desktop), headings centred; cards use bg-2, 1px rule
+border, 12px radius; buttons are pills (fg background with bg text for the
+primary, 1px rule outline for the secondary; 48px tall).
+
+**Nav.** Over the hero: tiny fg-2 text links top-left, the wordmark "Billion."
+centred in Outfit 500, one pill "Talk to an engineer" top-right, all on a
+transparent bar. After the hero scrolls out, a floating dark pill nav
+(`rgba(18,18,18,0.72)` + backdrop blur, 1px rule) fades in, centred. Mobile:
+wordmark + Menu button, the existing sheet.
+
+**Hero.** Full viewport (`100svh`). Background: a CSS dusk gradient (top
+`#232a37` → `#4f4f55` at 55% → `#3a2e29` at 85% → bg) with film grain (an SVG
+feTurbulence data-URI layer at 8% opacity, overlay). On top, the Hyperspace
+canvas (section 11). Content: the motto alone, centred, two lines, the orb as
+the full stop (`theme="dark"`, i.e. light dots). No subline, no buttons, no
+panel in the hero. The sub paragraph moves to the What-we-build heading block.
+
+**Sections.** 02 What we build: centred H2 + the sub paragraph as subline; six
+solutions as a two-column typographic list (title in fg with a trailing arrow,
+one-line body in fg-2), no cards; the system schematic in white floats to the
+right of the list on desktop, tilted with a CSS perspective transform, above
+the list on mobile; the "What we optimize first" panel sits under the schematic.
+03 Performance: centred H2 + body; the live vitals rendered as one floating
+tilted card (bg-2) with three rows and a progress bar per row (fill =
+min(value / target, 1.25), ember when over target); audits ledger and
+principles as plain typography under it. 04 How we work: white timeline, four
+steps. 05 Proof: story left, chat still as a bg-2 card right. 06 CTA: centred
+closing statement + two pill buttons (magnetic). 07 Footer: link columns, then
+the giant ghosted wordmark "billion" cut off by the bottom edge (the watermark
+moves here from the hero).
+
+**Motion rules unchanged**: transform-only entrances, nothing animates the LCP
+element, hover-only loops, reduced motion static, no-JS complete.
+
+## 11. Hyperspace (owner request, 2026-09-17)
+
+When the pointer enters the word "Billion" in the hero (or the word is tapped
+on touch, or focused via keyboard), the hero background jumps to light speed:
+a canvas starfield behind the text where stars accelerate outward from the
+centre and stretch into streaks, then ease back and fade within about a second
+of the pointer leaving. Implementation: one `<canvas>` (`aria-hidden`) sized to
+the hero, devicePixelRatio-aware, at most 400 stars, requestAnimationFrame only
+while active or settling, idle otherwise (a static sparse starfield is drawn
+once); touch tap runs a 1.5 s burst; reduced motion shows the static stars and
+never animates; paused off-screen; zero dependencies. The word gets
+`cursor: default`, no layout change on hover.

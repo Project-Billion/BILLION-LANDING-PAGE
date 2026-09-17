@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ThinkingOrb as OrbComponent } from "thinking-orbs";
 import { useMotionPreference } from "@/components/motion/useMotionPreference";
@@ -16,8 +15,7 @@ const ThinkingOrb = dynamic(
 /** Decorative full stop: its reserved line box survives loading, resizing and motion preferences. */
 export function Orb({ className = "" }: { className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const reducedMotion = useReducedMotion();
-  const preference = useMotionPreference() ?? reducedMotion;
+  const preference = useMotionPreference();
   const [inView, setInView] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [size, setSize] = useState(40);
@@ -62,11 +60,11 @@ export function Orb({ className = "" }: { className?: string }) {
       aria-hidden="true"
       className={`relative inline-grid size-[0.42em] place-items-center align-baseline ${className}`}
     >
-      <span className={`absolute inset-0 rounded-full bg-kiln ${showOrb && ready ? "invisible" : ""}`} />
+      <span className={`absolute inset-0 rounded-full bg-fg ${showOrb && ready ? "invisible" : ""}`} />
       {showOrb && (
         <ThinkingOrb
           state="breathing"
-          theme="light"
+          theme="dark"
           size={size <= 32 ? 20 : 64}
           paused={!inView}
           className="absolute inset-0"

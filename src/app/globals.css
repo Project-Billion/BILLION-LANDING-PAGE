@@ -7,44 +7,44 @@
  * `static` emits every variable so later sections can use them in plain CSS.
  */
 @theme static {
-  /* Palette: one palette for the page; the Proof section reuses it inverted. */
-  --color-paper: #f5f2ec;
-  --color-paper-2: #ede8df;
-  --color-white: #ffffff;
-  --color-ink: #15130f;
-  --color-ink-2: #2b2822;
-  --color-graphite: #6b665c;
-  --color-rule: rgba(21, 19, 15, 0.1);
-  --color-rule-dark: rgba(245, 242, 236, 0.14);
+  /* Palette: one dark background for the whole page (design spec section 10, v2). */
+  --color-bg: #121212;
+  --color-bg-2: #171717;
+  --color-fg: rgba(255, 255, 255, 0.92);
+  --color-fg-2: #a3a3a3;
+  --color-rule: rgba(255, 255, 255, 0.1);
   --color-kiln: #b5502f;
-  --color-kiln-hover: #9e4327;
-  --color-kiln-tint: #f3e4dd;
+  --color-ember: #e0805a;
 
   /* Type scale */
-  --text-h1: clamp(2.75rem, 6vw, 5.5rem);
-  --text-h1--line-height: 1.05;
-  --text-h1--letter-spacing: -0.02em;
-  --text-h2: clamp(2rem, 4vw, 3.5rem);
+  --text-h1: clamp(3.25rem, 8vw, 6rem);
+  --text-h1--line-height: 1.02;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h2: clamp(2.25rem, 4.5vw, 3.75rem);
   --text-h2--line-height: 1.05;
-  --text-h2--letter-spacing: -0.02em;
-  --text-h3: clamp(1.5rem, 2.4vw, 2.125rem);
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: clamp(1.375rem, 2vw, 1.75rem);
   --text-h3--line-height: 1.1;
   --text-h3--letter-spacing: -0.02em;
   --text-body: 1.0625rem;
   --text-body--line-height: 1.6;
+  --text-sub: 1.25rem;
+  --text-sub--line-height: 1.5;
   --text-ui: 0.9375rem;
   --text-ui--line-height: 1.4;
   --text-meta: 0.8125rem;
   --text-meta--line-height: 1.4;
   --text-meta--letter-spacing: 0.08em;
 
-  /* Corner radius: 2 to 6px only. */
+  /* Corner radius: 2 to 6px for detail chrome, lg for cards, pill for buttons/nav. */
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
 
   /* Layout */
-  --container-page: 1280px;
+  --container-page: 1200px;
   --nav-height: 4.5rem;
 
   /* Motion: curves (animate skill) */
@@ -59,23 +59,22 @@
   --duration-modal: 250ms;
   --duration-drawer: 500ms;
   --duration-reveal: 600ms;
-  --duration-hero: 400ms;
   --stagger-step: 50ms;
   --reveal-distance: 12px;
 }
 
 /* Font families map to next/font CSS variables set on <html> in layout.tsx. */
 @theme inline {
-  --font-display: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
   --font-arabic: var(--font-plex-arabic), "Segoe UI", "Geeza Pro", sans-serif;
 }
 
 @layer base {
   html {
-    background-color: var(--color-paper);
-    color: var(--color-ink-2);
+    background-color: var(--color-bg);
+    color: var(--color-fg-2);
     font-family: var(--font-sans);
     scroll-behavior: smooth;
     /* Anchor targets land below the floating nav. */
@@ -88,8 +87,8 @@
 
   body {
     min-height: 100dvh;
-    background-color: var(--color-paper);
-    color: var(--color-ink-2);
+    background-color: var(--color-bg);
+    color: var(--color-fg-2);
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     -webkit-font-smoothing: antialiased;
@@ -104,7 +103,7 @@
     font-family: var(--font-display);
     font-weight: 400;
     font-optical-sizing: auto;
-    color: var(--color-ink);
+    color: var(--color-fg);
     letter-spacing: -0.02em;
     line-height: 1.05;
     text-wrap: balance;
@@ -115,12 +114,12 @@
   }
 
   ::selection {
-    background-color: var(--color-kiln-tint);
-    color: var(--color-ink);
+    background-color: var(--color-rule);
+    color: var(--color-fg);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-kiln);
+    outline: 2px solid var(--color-fg);
     outline-offset: 3px;
     border-radius: var(--radius-xs);
   }
@@ -150,7 +149,8 @@
       transform var(--duration-press) var(--ease-out),
       background-color var(--duration-hover) ease,
       border-color var(--duration-hover) ease,
-      color var(--duration-hover) ease;
+      color var(--duration-hover) ease,
+      opacity var(--duration-hover) ease;
   }
 
   .btn:active {
@@ -188,30 +188,46 @@
     transition-delay: 0s;
   }
 
-  /* Optional 3% film grain (BRIEF section 4), fixed and non-interactive. */
-  .grain {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    pointer-events: none;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Floating nav pill: dark blurred surface that fades/translates in once the hero scrolls out. */
+  .nav-pill {
+    background-color: rgba(18, 18, 18, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* 02 What we build: chevron nudges 4px right on hover, fine pointer only, transform-only. */
+  .wwb-chevron {
+    display: inline-block;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .wwb-row:hover .wwb-chevron {
+      transform: translateX(4px);
+    }
   }
 }
 
 /*
  * Entrance motion (animate skill): rare/first-view tier, purpose = hierarchy on a
  * marketing page. opacity + transform only, --ease-out for entering, 600ms scroll reveal
- * (scroll-reveal recipe), a shorter 400ms hero entrance, 50ms stagger. Runs once, never loops.
+ * (scroll-reveal recipe), 50ms stagger. Runs once, never loops.
  */
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(var(--reveal-distance));
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes draw-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  /* No-JS visitors see the complete schematic immediately. */
+  @media (scripting: enabled) {
+    .reveal[data-visible="true"] .draw-stage {
+      clip-path: inset(0 100% 0 0);
+      animation: draw-wipe 520ms var(--ease-out) both;
+      animation-delay: calc(var(--draw-index, 0) * 110ms + 500ms);
+    }
+  }
+
   @keyframes hero-word-rise {
     from {
       transform: translateY(0.25em);
@@ -226,10 +242,16 @@
     animation-delay: calc(var(--i, 0) * 70ms);
   }
 
-  /* Hero: one staggered CSS animation on load; runs off the main thread while the page loads. */
-  .hero-in {
-    animation: rise-in var(--duration-hero) var(--ease-out) both;
-    animation-delay: calc(var(--reveal-index, 0) * var(--stagger-step));
+  @keyframes nav-pill-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  /* Floating nav: appears once the hero scrolls out (transform + opacity only, never the LCP element). */
+  .nav-pill-in {
+    animation: nav-pill-in var(--duration-popover) var(--ease-out) both;
   }
 }
 
@@ -265,7 +287,9 @@
   }
 
   .btn:active,
-  .nav-sheet {
+  .nav-sheet,
+  .wwb-chevron {
     transform: none;
   }
+
 }

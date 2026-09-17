@@ -1,6 +1,57 @@
 # Billion landing page — handoff
 
-## Status
+## Session 2026-09-16/17 — software-house pivot and dark system
+
+**Status.** The owner merged PR #3 (the software-house pivot up to the performance band) to `main` on 2026-09-17 and added the real WhatsApp, email and LinkedIn in a follow-up commit; production shows that state. Branch `feat/dark-visual-system` continues from it and holds the section motion, the dark visual system, the hyperspace effect and the measured audit rows. A PR is opened from this branch for owner approval of the preview.
+
+**Commits on `feat/dark-visual-system` (oldest first).**
+- `ff12769` feat(motion): card lift and hover ring, drawn schematic, scroll timeline, magnetic CTA
+- `b110b87` docs: rewrite the brief and readme for the software-house positioning
+- `fa20edf` merge of `origin/main` (the owner's real contact details)
+- `289745c` docs(spec): add the dark single-background visual system and the hyperspace effect (spec sections 10 and 11)
+- `7218b33` feat(design): move to the dark single-background system with Outfit
+- `8d41276` feat(sections): typographic solutions list, floating vitals card, dark proof and CTA
+- `fcc2055` feat(hero): hyperspace starfield behind the word Billion
+- `b37f1a7` feat(performance): publish measured audit rows and fix the wordmark contrast flag
+- docs and QA commits follow.
+
+**Decisions taken and why.**
+- Visual direction: first "evolve the editorial look", then, after the owner pointed at micro1.ai, one near-black background with Outfit, a full-viewport gradient hero holding only the motto, and a ghost wordmark in the footer (spec section 10).
+- Orb: the `thinking-orbs` package only offers a light or dark theme, so the full stop is monochrome light dots on dark.
+- `border-beam` was dropped: 27 kB gzip and a stylesheet injected per hover. The CSS ring that replaced it went away with the dark system; the cards became a typographic list.
+- Audit rows: Accessibility 100, Best practices 100, SEO 100 and 189 kB compressed JavaScript are published from this build because they are deterministic. Performance and Largest Contentful Paint are not published from this workstation (76 to 84 under load, 3.8 s simulated mobile); they are measured on the live site with PageSpeed Insights after release.
+- The owner merges after approving the preview.
+
+**What is custom and why.**
+- `src/components/motion/tween.ts`: a 40-line requestAnimationFrame number tween replaces `motion`'s standalone `animate`, which pulled a separate engine chunk; used by the vitals count-up and the audit counters.
+- `src/components/perf/vitals-store.ts` and `VitalValue.tsx`: web-vitals with `reportAllChanges`, capability detection ("not measured by this browser"), a 10 s fallback ("not measured on this visit") that never overwrites a real reading, a debounced polite live region, and rounding that never looks better than the rating.
+- Schematic and timeline: clip-path wipes per stage and a scaled hairline instead of stroke-dash draws, because `pathLength` on basic shapes and `vector-effect` behave differently across engines.
+- `src/components/hero/Hyperspace.tsx` and `hyperspace-field.ts`: canvas starfield, devicePixelRatio capped at 2, at most 400 stars, requestAnimationFrame only while active or settling, paused off-screen, static under reduced motion, pointer and touch triggers only (the word is not focusable).
+- `src/components/motion/useMotionPreference.ts`: the single SSR-stable source of the motion preference; motion's `useReducedMotion` is not used anywhere because mixing the two caused hydration mismatches.
+
+**Tooling notes.**
+- Orca pastes the task into Codex before its model has loaded, so the submit keystroke is lost, the dispatch is marked "stalled" and the worker's `ask` is rejected; one Enter in the terminal fixes it, and the worker's questions then arrive as escalations.
+- Codex ran out of its ChatGPT window twice mid-task (hero motion, section-motion fixes); Sonnet agents verified and finished from the partial state.
+- Claude Code's auto-mode classifier blocked `orca orchestration worker-start --agent codex`; the owner approved the allow rule `Bash(orca orchestration worker-start:*)` in `.claude/settings.local.json` (kept out of git via `.git/info/exclude`).
+- Reviews: one code review per task, plus a second adversarial review for the client-side vitals and the section motion; the second reviews found the real defects.
+
+**Owner actions before launch.**
+1. Approve the preview of `feat/dark-visual-system`, then merge.
+2. After the production deploy, run PageSpeed Insights on the production URL and add two rows to `performance.audits` in `src/content/site.ts`: Lighthouse mobile Performance and Largest Contentful Paint (median of three runs), then commit.
+3. Decide whether to delete the six stale `worktree-agent-*` branches and the old Orca worktree for `feat/landing-page`.
+
+**Follow-ups.**
+- Safari and Firefox have not been tested; QA covered Chrome and Edge only.
+- JavaScript shipped is 189 kB compressed, most of it the Next.js and React runtime plus `motion`; trimming further would mean replacing the remaining `m.*` usage.
+- If a link is ever added to the word "Billion", wire the hyperspace focus trigger (the listeners exist; the element is not focusable today).
+
+**Next session start here.**
+1. If the PR is merged: verify `main` in a clean checkout (`npm ci && npm run lint && npx tsc --noEmit && npm run build`), open the live site at 390 and 1440, then do owner action 2.
+2. If the PR is not merged: read the review comments, create a fix task in the same worktree, one commit per task.
+
+---
+
+## Status (Previous session, 2026-09-16)
 
 - Branch `feat/landing-page` on `Project-Billion/BILLION-LANDING-PAGE`. PR #1 (merged by the owner at 16:48 UTC, contains the build up to the six sections) and PR #2 https://github.com/Project-Billion/BILLION-LANDING-PAGE/pull/2 (QA report, fixes, handoff; open).
 - Deliverable: a deployable Next.js 16 (App Router, TypeScript) + Tailwind CSS 4 single-page marketing site at `/`, statically prerendered, no environment variables, Vercel-ready.

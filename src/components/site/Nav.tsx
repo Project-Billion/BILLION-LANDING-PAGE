@@ -1,48 +1,90 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { brand, nav, newTabHint, whatsappUrl } from "@/content/site";
+import { hero, nav, newTabHint, whatsappUrl } from "@/content/site";
 import { MobileMenu } from "./MobileMenu";
+import { useFloatingNav } from "./useFloatingNav";
+
+const linkClass =
+  "inline-flex min-h-11 items-center px-3 font-sans text-sm font-normal normal-case text-fg-2 transition-colors duration-(--duration-hover) hover:text-fg";
+
+function Wordmark() {
+  return (
+    <a href="#main" className="relative z-10 text-2xl font-medium tracking-[-0.01em] text-fg">
+      Billion.
+    </a>
+  );
+}
+
+function TalkButton() {
+  return (
+    <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
+      {hero.primaryCta}
+      <span className="sr-only">{newTabHint}</span>
+    </Button>
+  );
+}
 
 /**
- * Inset floating navigation bar (not glued edge to edge). Fixed so the WhatsApp
- * action and menu stay reachable; sections must leave room for --nav-height at the top.
+ * Two states (design spec section 10, v2): a transparent bar over the hero, three tiny
+ * links top-left, the wordmark centred and a pill CTA top-right; once the hero scrolls
+ * out, a centred floating pill carries the wordmark, all four links and the CTA. Driven
+ * by useFloatingNav (an IntersectionObserver on a sentinel Hero renders, no scroll
+ * listeners). Mobile keeps a plain wordmark + menu button in both states.
  */
 export function Nav() {
+  const floating = useFloatingNav();
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] md:pt-6">
       <Container className="pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))]">
-        <nav
-          aria-label="Main"
-          className="flex h-(--nav-height) items-center justify-between rounded-sm border border-rule bg-paper pl-5 pr-2 md:pl-7 md:pr-3"
-        >
-          <a
-            href="#main"
-            className="relative z-10 font-display text-[1.875rem] leading-none tracking-[-0.02em] text-ink"
-          >
-            {brand.name}
-          </a>
+        {/* Mobile: wordmark + menu, unchanged across both states. */}
+        <nav aria-label="Main" className="flex h-(--nav-height) items-center justify-between md:hidden">
+          <Wordmark />
+          <MobileMenu />
+        </nav>
 
-          <div className="hidden items-center gap-2 md:flex">
-            <ul className="flex items-center">
-              {nav.links.map((link) => (
+        {/* Desktop, over the hero: transparent bar. */}
+        {!floating && (
+          <nav aria-label="Main" className="hidden h-(--nav-height) items-center md:grid md:grid-cols-[1fr_auto_1fr]">
+            <ul className="flex items-center justify-self-start">
+              {nav.links.slice(0, 3).map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="inline-flex min-h-11 items-center px-4 text-ui text-ink-2 transition-colors duration-(--duration-hover) hover:text-ink"
-                  >
+                  <a href={link.href} className={linkClass}>
                     {link.label}
                   </a>
                 </li>
               ))}
             </ul>
-            <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
-              {nav.whatsappLabel}
-              <span className="sr-only">{newTabHint}</span>
-            </Button>
-          </div>
+            <Wordmark />
+            <div className="justify-self-end">
+              <TalkButton />
+            </div>
+          </nav>
+        )}
 
-          <MobileMenu />
-        </nav>
+        {/* Desktop, after the hero: centred floating pill. */}
+        {floating && (
+          <div className="hidden justify-center md:flex">
+            <nav
+              aria-label="Main"
+              className="nav-pill nav-pill-in flex items-center gap-6 rounded-pill border border-rule py-2 pr-2 pl-6"
+            >
+              <Wordmark />
+              <ul className="flex items-center">
+                {nav.links.map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} className={linkClass}>
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <TalkButton />
+            </nav>
+          </div>
+        )}
       </Container>
     </header>
   );
