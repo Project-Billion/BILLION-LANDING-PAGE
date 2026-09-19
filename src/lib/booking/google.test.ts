@@ -56,6 +56,31 @@ describe("Google Calendar provider", () => {
     expect(await createGoogleProvider(env).createEvent({ ...input, note: undefined })).toEqual({ eventId: "event", meetUrl: expected, htmlLink: null });
   });
 
+  it.each([
+    ["a non-Meet host", { id: "event", hangoutLink: "https://evil.example/meet.google.com" }],
+    ["a look-alike host", { id: "event", hangoutLink: "https://meet.google.com.evil.example/x" }],
+    ["a non-https scheme", { id: "event", hangoutLink: "javascript:alert(1)" }],
+    ["an unparsable value", { id: "event", hangoutLink: "not a url" }],
+  ])("returns a null meetUrl for %s", async (_label, response) => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(Response.json(response));
+    expect((await createGoogleProvider(env).createEvent(input)).meetUrl).toBeNull();
+  });
+
+  it("falls back to hangoutLink when the video entry point is not a Meet address", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(Response.json({
+      id: "event", hangoutLink: "https://meet.google.com/ok", conferenceData: { entryPoints: [{ entryPointType: "video", uri: "https://evil.example/x" }] },
+    }));
+    expect((await createGoogleProvider(env).createEvent(input)).meetUrl).toBe("https://meet.google.com/ok");
+  });
+
+  it("carries the HTTP status on the thrown error", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(new Response("private details", { status: 403 }));
+    await expect(createGoogleProvider(env).createEvent(input)).rejects.toMatchObject({ message: "403", status: 403 });
+  });
+
   it("shares cached tokens between providers and refreshes exactly 60 seconds before expiry", async () => {
     const { createGoogleProvider } = await import("./google");
     fetchMock.mockImplementation(async url => url === "https://oauth2.googleapis.com/token" ? token() : freeBusy());
@@ -82,13 +107,13 @@ describe("Google Calendar provider", () => {
   it.each([400, 401, 403, 429, 500])("exposes only HTTP status %i for failed token exchange", async status => {
     const { createGoogleProvider } = await import("./google");
     fetchMock.mockResolvedValueOnce(new Response("sensitive upstream error", { status }));
-    await expect(createGoogleProvider(env).getBusy(from, to)).rejects.toEqual(new Error(String(status)));
+    await expect(createGoogleProvider(env).getBusy(from, to)).rejects.toMatchObject({ message: String(status), status });
   });
 
   it("exposes only the HTTP status for failed Calendar calls", async () => {
     const { createGoogleProvider } = await import("./google");
     fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(new Response("private details", { status: 403 }));
-    await expect(createGoogleProvider(env).createEvent(input)).rejects.toEqual(new Error("403"));
+    await expect(createGoogleProvider(env).createEvent(input)).rejects.toMatchObject({ message: "403", status: 403 });
   });
 
   it("retries token exchange after a failed refresh", async () => {
@@ -107,5 +132,19 @@ describe("Google Calendar provider", () => {
     const { createGoogleProvider } = await import("./google");
     fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(Response.json(data));
     await expect(createGoogleProvider(env).getBusy(from, to)).rejects.toThrow("Invalid calendar response");
+  });
+});
+
+describe("Google Calendar provider timeouts", () => {
+  it("passes an abort signal to every outbound request", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token())
+      .mockResolvedValueOnce(freeBusy())
+      .mockResolvedValueOnce(Response.json({ id: "event-1" }));
+    const provider = createGoogleProvider(env);
+    await provider.getBusy(from, to);
+    await provider.createEvent(input);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    for (const [, init] of fetchMock.mock.calls) expect(init?.signal).toBeInstanceOf(AbortSignal);
   });
 });

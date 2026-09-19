@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { bookingRules } from "@/content/booking";
 import type { BusyInterval, CalendarProvider } from "./provider";
 
@@ -8,14 +9,37 @@ type Token = { accessToken: string; expiresAt: number };
 const tokens = new Map<string, Token>();
 const refreshing = new Map<string, Promise<Token>>();
 
+/** Thrown for a non-2xx Google response. The message is only the status; the body is never kept. */
+export class GoogleHttpError extends Error {
+  constructor(readonly status: number) {
+    super(String(status));
+    this.name = "GoogleHttpError";
+  }
+}
+
+// Only ever hand a Google Meet address to the visitor, whatever the API returned.
+function safeMeetUrl(...candidates: unknown[]): string | null {
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") continue;
+    try {
+      const url = new URL(candidate);
+      if (url.protocol === "https:" && url.host === "meet.google.com") return url.href;
+    } catch {
+      // Not a URL; try the next candidate.
+    }
+  }
+  return null;
+}
+
 async function checkedFetch(url: string, init: RequestInit): Promise<Response> {
-  const response = await fetch(url, { ...init, cache: "no-store" });
-  if (!response.ok) throw new Error(String(response.status));
+  const response = await fetch(url, { ...init, cache: "no-store", signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new GoogleHttpError(response.status);
   return response;
 }
 
 async function accessToken(env: GoogleEnvironment): Promise<string> {
-  const key = JSON.stringify([env.clientId, env.clientSecret, env.refreshToken]);
+  // Hash the credentials so the raw secrets are never held as map keys.
+  const key = createHash("sha256").update(JSON.stringify([env.clientId, env.clientSecret, env.refreshToken])).digest("hex");
   const cached = tokens.get(key);
   if (cached && Date.now() < cached.expiresAt - 60_000) return cached.accessToken;
   let pending = refreshing.get(key);
@@ -85,7 +109,7 @@ export function createGoogleProvider(env: GoogleEnvironment): CalendarProvider {
       });
       if (typeof data.id !== "string" || !data.id) throw new Error("Invalid calendar response");
       const video = data.conferenceData?.entryPoints?.find((entry: { entryPointType?: string; uri?: string }) => entry.entryPointType === "video");
-      return { eventId: data.id, meetUrl: video?.uri ?? data.hangoutLink ?? null, htmlLink: data.htmlLink ?? null };
+      return { eventId: data.id, meetUrl: safeMeetUrl(video?.uri, data.hangoutLink), htmlLink: data.htmlLink ?? null };
     },
   };
 }
