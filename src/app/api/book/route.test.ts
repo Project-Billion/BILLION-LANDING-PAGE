@@ -233,4 +233,14 @@ describe("POST /api/book", () => {
     expect(details).toEqual({ operation: "createEvent", requestId: expect.stringMatching(/^[0-9a-f-]{36}$/), status: 403 });
     expect(JSON.stringify(log.mock.calls)).not.toMatch(/alex|secret|Hello/);
   });
+
+  it("also logs the Google step and short error code", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { GoogleHttpError } = await import("@/lib/booking/google");
+    mocks.createEvent.mockRejectedValue(new GoogleHttpError(401, "token", "invalid_client"));
+    const response = await post(valid);
+    expect(await response.text()).toBe(JSON.stringify({ error: "generic" }));
+    expect(log.mock.calls[0][1]).toEqual({ operation: "createEvent", requestId: expect.stringMatching(/^[0-9a-f-]{36}$/), status: 401, step: "token", code: "invalid_client" });
+    expect(JSON.stringify(log.mock.calls)).not.toMatch(/alex|secret|Hello/);
+  });
 });

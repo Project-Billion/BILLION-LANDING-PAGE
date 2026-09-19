@@ -116,6 +116,41 @@ describe("Google Calendar provider", () => {
     await expect(createGoogleProvider(env).createEvent(input)).rejects.toMatchObject({ message: "403", status: 403 });
   });
 
+  it("keeps only Google's short error code for a failed token exchange", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(Response.json({ error: "invalid_client", error_description: "secret text" }, { status: 401 }));
+    const error = await createGoogleProvider(env).getBusy(from, to).catch((e: Error) => e);
+    expect(error).toMatchObject({ name: "GoogleHttpError", status: 401, step: "token", code: "invalid_client", message: "401" });
+    expect(JSON.stringify(error)).not.toContain("secret text");
+    expect(String((error as Error).stack)).not.toContain("secret text");
+  });
+
+  it.each([
+    ["a non-JSON body", () => new Response("<html>oops</html>", { status: 401 })],
+    ["an unexpected code", () => Response.json({ error: "bad code!\nwith text" }, { status: 401 })],
+    ["a too-long code", () => Response.json({ error: "a".repeat(41) }, { status: 401 })],
+    ["a non-string code", () => Response.json({ error: { status: 5 } }, { status: 401 })],
+  ])("gives no code for %s", async (_label, makeResponse) => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(makeResponse());
+    const error = await createGoogleProvider(env).getBusy(from, to).catch((e: Error) => e);
+    expect(error).toMatchObject({ status: 401, step: "token", message: "401" });
+    expect((error as { code?: string }).code).toBeUndefined();
+  });
+
+  it("reads the Calendar API error status and names the freebusy step", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(Response.json({ error: { status: "PERMISSION_DENIED", message: "x" } }, { status: 403 }));
+    const error = await createGoogleProvider(env).getBusy(from, to).catch((e: Error) => e);
+    expect(error).toMatchObject({ status: 403, step: "freebusy", code: "PERMISSION_DENIED", message: "403" });
+  });
+
+  it("names the insert step when creating an event fails", async () => {
+    const { createGoogleProvider } = await import("./google");
+    fetchMock.mockResolvedValueOnce(token()).mockResolvedValueOnce(Response.json({ error: { status: "NOT_FOUND" } }, { status: 404 }));
+    await expect(createGoogleProvider(env).createEvent(input)).rejects.toMatchObject({ status: 404, step: "insert", code: "NOT_FOUND" });
+  });
+
   it("retries token exchange after a failed refresh", async () => {
     const { createGoogleProvider } = await import("./google");
     fetchMock.mockResolvedValueOnce(new Response("failed", { status: 500 })).mockResolvedValueOnce(token()).mockResolvedValueOnce(freeBusy());

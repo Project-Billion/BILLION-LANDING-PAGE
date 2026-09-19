@@ -9,11 +9,27 @@ type Token = { accessToken: string; expiresAt: number };
 const tokens = new Map<string, Token>();
 const refreshing = new Map<string, Promise<Token>>();
 
-/** Thrown for a non-2xx Google response. The message is only the status; the body is never kept. */
+type GoogleStep = "token" | "freebusy" | "insert";
+
+/**
+ * Thrown for a non-2xx Google response. The message is only the status. Of the body, only Google's
+ * short error code (e.g. "invalid_client") is kept, and only when it looks like one.
+ */
 export class GoogleHttpError extends Error {
-  constructor(readonly status: number) {
+  constructor(readonly status: number, readonly step: GoogleStep, readonly code?: string) {
     super(String(status));
     this.name = "GoogleHttpError";
+  }
+}
+
+// OAuth endpoints answer {"error": "code"}; the Calendar API answers {"error": {"status": "CODE"}}.
+async function googleErrorCode(response: Response): Promise<string | undefined> {
+  try {
+    const data = await response.json();
+    const raw = typeof data?.error === "string" ? data.error : data?.error?.status;
+    return typeof raw === "string" && /^[A-Za-z_]{1,40}$/.test(raw) ? raw : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -31,9 +47,9 @@ function safeMeetUrl(...candidates: unknown[]): string | null {
   return null;
 }
 
-async function checkedFetch(url: string, init: RequestInit): Promise<Response> {
+async function checkedFetch(step: GoogleStep, url: string, init: RequestInit): Promise<Response> {
   const response = await fetch(url, { ...init, cache: "no-store", signal: AbortSignal.timeout(8000) });
-  if (!response.ok) throw new GoogleHttpError(response.status);
+  if (!response.ok) throw new GoogleHttpError(response.status, step, await googleErrorCode(response));
   return response;
 }
 
@@ -45,7 +61,7 @@ async function accessToken(env: GoogleEnvironment): Promise<string> {
   let pending = refreshing.get(key);
   if (!pending) {
     pending = (async () => {
-      const response = await checkedFetch("https://oauth2.googleapis.com/token", {
+      const response = await checkedFetch("token", "https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -71,9 +87,9 @@ async function accessToken(env: GoogleEnvironment): Promise<string> {
 }
 
 export function createGoogleProvider(env: GoogleEnvironment): CalendarProvider {
-  async function post(url: string, body: unknown) {
+  async function post(step: "freebusy" | "insert", url: string, body: unknown) {
     const token = await accessToken(env);
-    const response = await checkedFetch(url, {
+    const response = await checkedFetch(step, url, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -83,7 +99,7 @@ export function createGoogleProvider(env: GoogleEnvironment): CalendarProvider {
 
   return {
     async getBusy(fromIso, toIso) {
-      const data = await post("https://www.googleapis.com/calendar/v3/freeBusy", {
+      const data = await post("freebusy", "https://www.googleapis.com/calendar/v3/freeBusy", {
         timeMin: fromIso, timeMax: toIso,
         timeZone: bookingRules.timeZone, items: [{ id: env.calendarId }],
       });
@@ -99,7 +115,7 @@ export function createGoogleProvider(env: GoogleEnvironment): CalendarProvider {
       return busy;
     },
     async createEvent(input) {
-      const data = await post(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(env.calendarId)}/events?conferenceDataVersion=1&sendUpdates=all`, {
+      const data = await post("insert", `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(env.calendarId)}/events?conferenceDataVersion=1&sendUpdates=all`, {
         summary: `Billion discovery call: ${input.name.replace(/[\r\n]/g, "")}`,
         description: (input.note ?? "").replace(/\r\n?/g, "\n"),
         start: { dateTime: input.startIso, timeZone: bookingRules.timeZone },

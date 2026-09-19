@@ -136,6 +136,16 @@ Edit these values to match your calendar preferences, redeploy, and the /book pa
 
 ## Troubleshooting
 
+**Booking or availability returns an error (502)**
+The server log line ("booking failed" or "availability lookup failed") includes a `step` and, when Google sent one, a short `code`. Find the matching row. The four Google values (client ID, client secret, refresh token, calendar ID) are trimmed automatically, including stray spaces, line breaks and one pair of wrapping quotes, but re-copy them anyway if a row below points at them.
+
+| `step` | `code` (status) | Meaning and fix |
+| --- | --- | --- |
+| `token` | `invalid_client` (401) | Client ID or Client secret is wrong, or does not match the client that issued the refresh token. Re-copy both, with no spaces or quotes. |
+| `token` | `invalid_grant` (400) | Refresh token is wrong, expired or revoked. Redo Step 4, and check the app is In production. |
+| `freebusy` or `insert` | `PERMISSION_DENIED` or `accessNotConfigured` (403) | The Google Calendar API is not enabled, or a scope is missing. Enable the API and repeat Steps 3 and 4. |
+| `freebusy` or `insert` | `NOT_FOUND` (404) | `GOOGLE_CALENDAR_ID` is wrong. |
+
 **"invalid_grant" error when booking**
 The refresh token has expired or been revoked. This usually means Google deleted it because the app was in "Testing" mode for 7 days (Step 2). Go back to Step 4 to get a fresh refresh token, then update it in Vercel and redeploy.
 

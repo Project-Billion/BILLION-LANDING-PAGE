@@ -1,4 +1,5 @@
 import { getCalendarProvider, ProviderNotConfiguredError } from "@/lib/booking";
+import { GoogleHttpError } from "@/lib/booking/google";
 import { clientIp } from "@/lib/booking/client-ip";
 import { createRateLimiter } from "@/lib/booking/rate-limit";
 import { computeSlots, isSlotFree } from "@/lib/booking/slots";
@@ -34,10 +35,11 @@ function sameOrigin(request: Request): boolean {
   return hosts.includes(originHost);
 }
 
-/** Logs the failing step, a random id and the upstream status only; never any visitor input. */
+/** Logs the failing operation, a random id, the upstream status and Google's short error code only; never any visitor input. */
 function logFailure(operation: string, error: unknown): void {
   const status = (error as { status?: unknown } | null)?.status;
-  console.error("booking failed", { operation, requestId: crypto.randomUUID(), ...(typeof status === "number" ? { status } : {}) });
+  const google = error instanceof GoogleHttpError ? { step: error.step, ...(error.code ? { code: error.code } : {}) } : {};
+  console.error("booking failed", { operation, requestId: crypto.randomUUID(), ...(typeof status === "number" ? { status } : {}), ...google });
 }
 
 export async function POST(request: Request): Promise<Response> {
