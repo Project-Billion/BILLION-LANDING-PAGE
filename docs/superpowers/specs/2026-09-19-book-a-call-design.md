@@ -1,6 +1,6 @@
 # Book a call: design
 
-Date: 2026-09-19. Status: awaiting owner review.
+Date: 2026-09-19. Status: Implemented, awaiting owner review.
 
 ## Goal
 
@@ -8,14 +8,14 @@ Date: 2026-09-19. Status: awaiting owner review.
 duration, a day and a time on a dedicated `/book` page. Confirming creates a Google
 Calendar event with a Google Meet link and emails the invite to the visitor and the owner.
 Inspiration: meet.swegit.io/discovery-session (three-panel scheduler). Our own visual
-style (paper / ink / kiln, serif headings, square buttons), not a copy of theirs.
+style: the existing dark system (near-black background, Outfit type, kiln accent), not a copy of theirs.
 
 ## Decisions (owner-approved 2026-09-19)
 
 | Topic | Decision |
 |---|---|
 | Meet + calendar | Google Calendar REST API, owner's account via OAuth refresh token |
-| Placement | Dedicated `/book` page, linked from every "Talk to an engineer" / "Book a call" button |
+| Placement | Dedicated `/book` page, linked from every "Book a call" button |
 | Availability | Sun-Thu, 10:00-18:00 Africa/Cairo, 30-minute start slots, 15-minute buffer, min 24 h notice, max 30 days ahead |
 | Durations | 15 / 30 / 60 minutes, default 30 |
 | Storage | None. Google Calendar is the only record |
@@ -79,8 +79,9 @@ groups them by the visitor's local day. Response is `Cache-Control: no-store`.
 ### Booking
 
 `POST /api/book` recomputes the free slots server-side and rejects (409) any `start` that is not in
-that set, so arbitrary times cannot be booked. It re-checks busy time immediately before
-`events.insert`. Event: summary "Billion discovery call: <name>", organizer is the owner, attendee is the
+that set, so arbitrary times cannot be booked. Busy time is checked once per request, and an in-process
+per-start lock stops two concurrent requests in the same instance from taking the same slot. A race
+between two serverless instances remains possible and is accepted for this low-volume page. Event: summary "Billion discovery call: <name>", organizer is the owner, attendee is the
 visitor, time zone Africa/Cairo, description carries the visitor's note,
 `conferenceData.createRequest` with `conferenceSolutionKey.type = "hangoutsMeet"` and a random
 `requestId`, `conferenceDataVersion=1`, `sendUpdates=all`.
@@ -91,14 +92,36 @@ visitor, time zone Africa/Cairo, description carries the visitor's note,
 - Validate every field: name 1-100 chars, email format and <= 254 chars, note <= 1000, `duration`
   in the allowed set, `timezone` must be a valid IANA zone, `start` must be an ISO instant.
   Strip CR/LF from anything placed in event fields.
-- Honeypot field `website` (must be empty) plus per-IP limit (5 bookings / hour, 60 availability calls / minute).
+- Honeypot field `website`: the form always sends `website: ""`, so the key must exist and be an empty
+  string. A missing or non-empty value is silently dropped (200 `{ ok: true }`) and does not use up the
+  rate limit. Plus per-IP limit (5 bookings / hour, 60 availability calls / minute).
+- The client key comes from platform-set headers only: `x-vercel-forwarded-for` (trusted only when
+  `process.env.VERCEL` is set), then the rightmost `x-forwarded-for` entry, then `x-real-ip`; the leftmost
+  forwarded entry is client-controlled. `x-forwarded-host` is likewise honoured in the same-origin check
+  only on Vercel.
+- `POST /api/book` requires a same-origin `Origin`, an `application/json` content type and a
+  `Content-Length` of at most 8192; timezone is capped at 64 characters; control, bidi and zero-width
+  characters are stripped from name, email and note.
+- Only `https://meet.google.com` links are returned to the visitor.
 - Errors returned to the client are generic; details go to server logs without personal data.
 - `security-auditor` review is mandatory before merge.
 
+### Abuse limits
+
+The per-IP limits (5 bookings / hour, 60 availability calls / minute) and the deployment-wide booking
+limit (30 / hour, key `global`) are held in memory per serverless instance, so they are best effort.
+Because `sendUpdates=all` makes Google email the visitor-supplied address from the owner's account, a
+determined abuser could still cause some unwanted invitations. Follow-up: move the limits to a shared
+store (Upstash / Vercel KV) or use Vercel WAF rate limiting.
+
+The global limiter is charged only for real booking attempts: it is checked just before the calendar
+event is created, after validation, origin and content checks, the honeypot and the slot check, so
+rejected requests (400, 409, honeypot) do not consume it. The per-IP limiter still runs first.
+
 ## WhatsApp / contact changes
 
-- `src/components/site/Nav.tsx`, `MobileMenu.tsx`, `sections/CTA.tsx`, hero primary CTA: link to `/book`,
-  label "Book a call" (hero keeps "Talk to an engineer"). No `wa.me`, no `target="_blank"`.
+- `src/components/site/Nav.tsx`, `MobileMenu.tsx`, `sections/CTA.tsx`, the nav button and the CTA section: link to `/book`,
+  label "Book a call" (`hero.primaryCta` was removed). No `wa.me`, no `target="_blank"`.
 - `src/content/site.ts`: keep `siteConfig.contact.whatsappE164` and `whatsappUrl()` for the footer only;
   drop `nav.whatsappLabel` and `cta.whatsappLabel`; update copy in `cta`.
 - `Footer.tsx`: unchanged.

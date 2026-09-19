@@ -140,7 +140,16 @@ Check two things:
 2. Make sure `GOOGLE_CALENDAR_ID` points to a calendar that allows conferencing.
 
 **The time slot shows "free" on /book but the booking fails**
-Your calendar changed between when the page showed the free slot and when you confirmed the booking. The server re-checks availability before creating the event to prevent double-booking. Simply try again with a different slot.
+Your calendar changed between when the page showed the free slot and when you confirmed the booking. The server checks availability again when the booking request arrives and refuses a slot that is no longer free. Simply try again with a different slot.
 
 **Bookings don't appear in Google Calendar**
 Check that `GOOGLE_CALENDAR_ID` is correct. If omitted or set incorrectly, events go to an unexpected calendar.
+
+## Known limits
+
+The rate limits (5 bookings per hour per visitor and 30 per hour for the whole site) are kept in memory
+on each serverless instance, so they are best effort rather than a hard guarantee, and two instances
+could in rare cases book the same slot at once. Google emails the visitor-supplied address from your
+account when an event is created (`sendUpdates=all`), so abuse could cause unwanted invitations. The
+durable fix is a shared store (Upstash or Vercel KV) or Vercel WAF rate limiting; both are follow-ups.
+A password manager that fills the hidden `website` field makes the server silently drop the booking while the page shows success (unlikely, but possible).
