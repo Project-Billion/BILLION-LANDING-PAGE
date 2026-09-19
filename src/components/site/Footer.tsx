@@ -47,6 +47,11 @@ export function Footer() {
                 <span className="sr-only">{newTabHint}</span>
               </a>
             </li>
+            <li>
+              <a href={footer.links.privacy.href} className={linkClass}>
+                {footer.links.privacy.label}
+              </a>
+            </li>
           </ul>
         </div>
 
