@@ -1,5 +1,6 @@
 import { bookingRules, type Duration } from "@/content/booking";
 import { getCalendarProvider, ProviderNotConfiguredError } from "@/lib/booking";
+import { GoogleHttpError } from "@/lib/booking/google";
 import { clientIp } from "@/lib/booking/client-ip";
 import { createRateLimiter } from "@/lib/booking/rate-limit";
 import { computeSlots, monthRange } from "@/lib/booking/slots";
@@ -27,7 +28,8 @@ export async function GET(request: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof ProviderNotConfiguredError) return respond({ error: "notConfigured" }, 503);
     const status = (error as { status?: unknown } | null)?.status;
-    console.error("availability lookup failed", { requestId: crypto.randomUUID(), ...(typeof status === "number" ? { status } : {}) });
+    const google = error instanceof GoogleHttpError ? { step: error.step, ...(error.code ? { code: error.code } : {}) } : {};
+    console.error("availability lookup failed", { requestId: crypto.randomUUID(), ...(typeof status === "number" ? { status } : {}), ...google });
     return respond({ error: "generic" }, 502);
   }
 }

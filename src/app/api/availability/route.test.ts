@@ -86,4 +86,13 @@ describe("GET /api/availability", () => {
     expect(response.status).toBe(502);
     expect(await response.text()).toBe(JSON.stringify({ error: "generic" }));
   });
+
+  it("logs the Google step and short error code with a generic response", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { GoogleHttpError } = await import("@/lib/booking/google");
+    mocks.getBusy.mockRejectedValue(new GoogleHttpError(403, "freebusy", "PERMISSION_DENIED"));
+    const response = await get("month=2026-09&duration=30");
+    expect(await response.text()).toBe(JSON.stringify({ error: "generic" }));
+    expect(log.mock.calls[0][1]).toEqual({ requestId: expect.stringMatching(/^[0-9a-f-]{36}$/), status: 403, step: "freebusy", code: "PERMISSION_DENIED" });
+  });
 });
