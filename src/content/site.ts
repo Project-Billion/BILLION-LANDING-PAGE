@@ -117,7 +117,6 @@ export const hero = {
   eyebrow: "Software house · Cairo, Egypt",
   title: { line1: "Think Bigger", line2: "Think Billion" },
   sub: "Billion is a software house with one obsession: performance, pushed to the maximum. AI products, platforms, data systems, operations software. Bring us any problem; we build the solution and we make it fast.",
-  primaryCta: "Talk to an engineer",
   secondaryCta: { label: "See what we build", href: "#what-we-build" },
   trustLine:
     "Engineers in Cairo. Arabic-first when it matters, English everywhere else. Sister company: Valor Labs.",
