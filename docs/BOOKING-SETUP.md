@@ -36,6 +36,14 @@ Without these, the app shows "Booking unavailable" to visitors on the live site.
 6. Add your Google account (the one whose calendar you want to use for bookings)
 7. Click "Back to Dashboard"
 
+**Homepage and privacy policy links (do this before pressing Publish app).** Google requires both to publish the app. On the "Branding" page of the consent screen, set:
+
+- Application home page: `https://billion-solutions.vercel.app`
+- Application privacy policy link: `https://billion-solutions.vercel.app/privacy`
+- Authorized domains: `billion-solutions.vercel.app`
+
+Save these first. The /privacy page must be live on that domain before you publish.
+
 **Important: Publish to "In production"**
 
 Still on the OAuth consent screen, look for a blue "Publish App" button or similar option to change the status from "Testing" to "In production". This is critical: while the app status is "Testing", Google deletes refresh tokens after 7 days, and bookings will silently fail. An in-production app with an unverified domain just shows a warning screen to test users (you), which is fine for a personal calendar.
