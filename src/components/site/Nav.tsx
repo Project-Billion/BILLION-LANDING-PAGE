@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { hero, nav, newTabHint, whatsappUrl } from "@/content/site";
+import { nav } from "@/content/site";
 import { MobileMenu } from "./MobileMenu";
 import { useFloatingNav } from "./useFloatingNav";
 
@@ -19,9 +19,8 @@ function Wordmark() {
 
 function TalkButton() {
   return (
-    <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer">
-      {hero.primaryCta}
-      <span className="sr-only">{newTabHint}</span>
+    <Button href="/book" variant="accent">
+      {nav.bookLabel}
     </Button>
   );
 }

@@ -9,7 +9,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 interface StyleProps {
-  /** primary = solid Fg, accent = solid Kiln (WhatsApp only), secondary = hairline outline. */
+  /** primary = solid Fg, accent = solid Kiln (the primary booking action), secondary = hairline outline. */
   variant?: ButtonVariant;
   className?: string;
   children: ReactNode;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ArrowRight } from "@/components/ui/Icons";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { cta, mailtoUrl, newTabHint, whatsappUrl } from "@/content/site";
+import { cta, mailtoUrl } from "@/content/site";
 
 /** 06 CTA: one quiet centred closing statement with two pill buttons underneath. */
 export function CTA() {
@@ -21,10 +21,9 @@ export function CTA() {
           <p className="mx-auto mt-8 max-w-[50ch] text-body text-fg-2">{cta.body}</p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row sm:gap-6">
             <Magnetic>
-              <Button href={whatsappUrl()} variant="accent" target="_blank" rel="noopener noreferrer" className="w-full">
-                {cta.whatsappLabel}
+              <Button href="/book" variant="accent" className="w-full">
+                {cta.bookLabel}
                 <ArrowRight className="w-5" />
-                <span className="sr-only">{newTabHint}</span>
               </Button>
             </Magnetic>
             <Magnetic>
