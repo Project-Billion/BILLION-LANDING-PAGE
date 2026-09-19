@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { nav, newTabHint, whatsappUrl } from "@/content/site";
+import { nav } from "@/content/site";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const sheetLinkClass = "flex min-h-16 items-center font-display text-[2rem] leading-none tracking-[-0.02em] text-fg";
 const DESKTOP_QUERY = "(min-width: 768px)";
 
 /**
@@ -33,6 +35,9 @@ function inertOutside(dialog: HTMLElement): HTMLElement[] {
  */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const onBook = pathname === "/book";
   const sheetId = useId();
   const trapRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -118,26 +123,26 @@ export function MobileMenu() {
         <ul className="flex flex-col border-t border-rule">
           {nav.links.map((link) => (
             <li key={link.href} className="border-b border-rule">
-              <a
-                href={link.href}
-                onClick={close}
-                className="flex min-h-16 items-center font-display text-[2rem] leading-none tracking-[-0.02em] text-fg"
-              >
-                {link.label}
-              </a>
+              {isHome ? (
+                <a href={link.href} onClick={close} className={sheetLinkClass}>
+                  {link.label}
+                </a>
+              ) : (
+                <a href={`/${link.href}`} onClick={close} className={sheetLinkClass}>
+                  {link.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>
         <Button
-          href={whatsappUrl()}
-          variant="accent"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/book"
+          variant={onBook ? "secondary" : "accent"}
+          aria-current={onBook ? "page" : undefined}
           className="mt-auto w-full"
           onClick={close}
         >
-          {nav.whatsappLabel}
-          <span className="sr-only">{newTabHint}</span>
+          {nav.bookLabel}
         </Button>
       </div>
     </div>

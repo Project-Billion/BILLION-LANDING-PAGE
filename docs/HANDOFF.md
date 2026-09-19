@@ -1,5 +1,42 @@
 # Billion landing page — handoff
 
+## Session 2026-09-19 — book-a-call feature
+
+**Status.** Feature branch `feat-book-a-call` holds the /book page, booking API routes, availability logic, and Google Calendar integration. Documentation updated: README.md, docs/BRIEF.md, docs/HANDOFF.md, and new docs/BOOKING-SETUP.md.
+
+**What changed:**
+- New `/book` page: three-panel booking scheduler (duration, date/time picker, details form, confirmation)
+- GET `/api/availability` endpoint: returns free slots for a given month
+- POST `/api/book` endpoint: creates Google Calendar event with Meet link, sends invite emails
+- Availability config: `src/content/booking.ts` defines working days, hours, durations, buffer, notice, horizon
+- Google OAuth integration: uses refresh token to create events without re-authentication
+- Mock calendar provider for dev when credentials are absent; 503 response in production without them
+- Rate limiting: per-IP (5 bookings/hour, 60 availability calls/minute), honeypot field
+- Unit tests for slot generation (DST, timezones), validation, rate limiter
+
+**Config location:** All booking configuration is in `src/content/booking.ts`. Availability (days, hours, durations, buffer, notice period, horizon) can be edited without redeploying.
+
+**Owner actions still required:**
+1. Follow docs/BOOKING-SETUP.md to obtain four Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, GOOGLE_CALENDAR_ID)
+2. Set the four variables in Vercel (Project Settings, Environment Variables, Production and Preview), redeploy
+3. Test the booking flow end-to-end: book a slot, verify event + Meet link in Google Calendar, confirm invite email received
+4. Add to `.env.local` for local development if testing with real Google credentials (file is git-ignored)
+
+**Important notes:**
+- Google app status must be "In production" (not "Testing") in OAuth consent screen, or tokens expire after 7 days and bookings silently fail
+- Without credentials set, live site shows "Booking unavailable" and dev uses mock calendar (both expected behaviors)
+- WhatsApp link remains in the footer; primary CTA now goes to /book
+
+**Tests:** Run `npm test` to verify slot generation, validation, rate limiting, and Google provider request shaping.
+
+**Next steps:**
+1. Merge this branch
+2. Follow the owner actions above to set up Google credentials
+3. Redeploy to production
+4. Monitor for booking creation; if slots show free but fail (409), check Google Calendar for conflicts or wrong GOOGLE_CALENDAR_ID
+
+---
+
 ## Session 2026-09-16/17 — software-house pivot and dark system
 
 **Status.** The owner merged PR #3 (the software-house pivot up to the performance band) to `main` on 2026-09-17 and added the real WhatsApp, email and LinkedIn in a follow-up commit; production shows that state. Branch `feat/dark-visual-system` continues from it and holds the section motion, the dark visual system, the hyperspace effect and the measured audit rows. A PR is opened from this branch for owner approval of the preview.

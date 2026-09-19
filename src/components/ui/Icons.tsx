@@ -24,3 +24,40 @@ export function ArrowUpRight({ className = "" }: IconProps) {
     </svg>
   );
 }
+
+/** Left chevron for "previous" controls. */
+export function ChevronLeft({ className = "" }: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.25" className={`size-4 ${className}`}>
+      <path d="M10 3 5 8l5 5" />
+    </svg>
+  );
+}
+
+/** Right chevron for "next" controls. */
+export function ChevronRight({ className = "" }: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.25" className={`size-4 ${className}`}>
+      <path d="m6 3 5 5-5 5" />
+    </svg>
+  );
+}
+
+/** Small video-camera glyph used beside the Google Meet note. */
+export function Video({ className = "" }: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.25" className={`size-4 ${className}`}>
+      <rect x="1.5" y="4" width="9" height="8" rx="1.5" />
+      <path d="m10.5 7 4-2v6l-4-2" />
+    </svg>
+  );
+}
+
+/** Check mark for the confirmation state. */
+export function Check({ className = "" }: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.25" className={`size-4 ${className}`}>
+      <path d="m3 8.5 3.5 3.5L13 4.5" />
+    </svg>
+  );
+}

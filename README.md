@@ -19,6 +19,7 @@ Single-page marketing site for Billion, a Cairo-based software house with one ob
 npm install
 npm run dev      # http://localhost:3000
 npm run lint
+npm test
 npm run build
 ```
 
@@ -32,9 +33,15 @@ All owner-editable values sit in one object, `siteConfig`, in [src/content/site.
 
 | Key | Placeholder | Notes |
 | --- | --- | --- |
-| `contact.whatsappE164` | `+201000000000` | Rendered as `https://wa.me/201000000000` |
+| `contact.whatsappE164` | `+201000000000` | Footer link only; rendered as `https://wa.me/201000000000` |
 | `contact.email` | `hello@billion.example` | Used for the Email button and footer |
 | `social.linkedin` | `https://www.linkedin.com/company/billion` | Footer link |
 | `proof.quote` | `null` | Quote from Valor's team; hidden until filled |
 
 All other page copy is in the same file.
+
+## Book-a-call feature (live at /book)
+
+The primary CTA on the page now points to `/book` instead of WhatsApp. Visitors can schedule calls directly into your Google Calendar. The feature requires four Google OAuth environment variables: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, and `GOOGLE_CALENDAR_ID`.
+
+See [docs/BOOKING-SETUP.md](docs/BOOKING-SETUP.md) for the step-by-step owner guide to set these up in Vercel and locally. Without them, the live site shows "Booking unavailable" and development uses a mock calendar for testing the UI.

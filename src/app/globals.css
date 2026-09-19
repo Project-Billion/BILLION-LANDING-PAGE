@@ -316,6 +316,35 @@
   }
 }
 
+/*
+ * /book scheduler: panel and step changes fade in (200ms, opacity + 8px translate) and the
+ * loading skeleton shimmers. Both live inside no-preference, so reduced motion gets static UI.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  .step-in {
+    animation: step-in var(--duration-popover) var(--ease-out) both;
+  }
+
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  .skeleton {
+    background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
 /* BRIEF section 7: prefers-reduced-motion disables all motion. */
 @media (prefers-reduced-motion: reduce) {
   html {

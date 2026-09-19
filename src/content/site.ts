@@ -51,7 +51,7 @@ export interface Quote {
 
 export interface SiteConfig {
   readonly contact: {
-    /** WhatsApp number in E.164 format, e.g. "+201000000000". */
+    /** WhatsApp number in E.164 format, e.g. "+201000000000". Shown in the footer only. */
     readonly whatsappE164: string;
     readonly email: string;
   };
@@ -78,7 +78,7 @@ export const siteConfig: SiteConfig = {
   },
 };
 
-/** Returns the wa.me link for the configured WhatsApp number (digits only). */
+/** Returns the wa.me link for the configured WhatsApp number (digits only). Used in the footer only. */
 export function whatsappUrl(): string {
   const digits = siteConfig.contact.whatsappE164.replace(/\D/g, "");
   return `https://wa.me/${digits}`;
@@ -103,7 +103,7 @@ export const nav = {
     { label: "How we work", href: "#how-we-work" },
     { label: "Proof", href: "#proof" },
   ] satisfies readonly NavLink[],
-  whatsappLabel: "WhatsApp",
+  bookLabel: "Book a call",
   menuOpenLabel: "Open menu",
   menuCloseLabel: "Close menu",
   /** Visible toggle text; the accessible names above stay the source for screen readers. */
@@ -117,7 +117,6 @@ export const hero = {
   eyebrow: "Software house · Cairo, Egypt",
   title: { line1: "Think Bigger", line2: "Think Billion" },
   sub: "Billion is a software house with one obsession: performance, pushed to the maximum. AI products, platforms, data systems, operations software. Bring us any problem; we build the solution and we make it fast.",
-  primaryCta: "Talk to an engineer",
   secondaryCta: { label: "See what we build", href: "#what-we-build" },
   trustLine:
     "Engineers in Cairo. Arabic-first when it matters, English everywhere else. Sister company: Valor Labs.",
@@ -262,10 +261,10 @@ export const proof = {
 export const cta = {
   section: { id: "contact", index: "06" } satisfies SectionMeta,
   title: "Bring us the hardest thing on your plate.",
-  body: "Tell us what is slow, stuck or not built yet. We will look at it with you and say honestly whether it is worth building, how fast it can be, and what it would cost.",
-  whatsappLabel: "WhatsApp us",
+  body: "Tell us what is slow, stuck or not built yet. Pick a time and we will look at it with you on a Google Meet call, and say honestly whether it is worth building, how fast it can be, and what it would cost.",
+  bookLabel: "Book a call",
   emailLabel: "Email us",
-  responseNote: "Replies within one working day. Cairo time.",
+  responseNote: "Calendar invite and Meet link arrive by email.",
 } as const;
 
 export const footer = {
