@@ -43,3 +43,7 @@ next-env.d.ts
 
 # qa
 qa/screenshots/
+
+# exports and downloads dropped into docs/ (Vercel log exports, Google OAuth client secrets)
+docs/*.json
+client_secret*.json
